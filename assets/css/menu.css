@@ -1,0 +1,66 @@
+#pauseMenuOverlay {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    background: rgba(0, 0, 0, 0.45);
+    z-index: 9999;
+}
+
+#pauseMenuOverlay.visible {
+    display: flex;
+}
+
+#pauseMenuBox {
+    width: min(420px, 90vw);
+    padding: 24px;
+    color: white;
+    background: rgba(18, 18, 24, 0.98);
+    border: 3px solid #d5b56b;
+    border-radius: 12px;
+    font-family: Arial, sans-serif;
+    text-align: center;
+    box-shadow:
+        0 0 0 3px rgba(0, 0, 0, 0.65),
+        0 15px 40px rgba(0, 0, 0, 0.65);
+}
+
+#pauseMenuTitle {
+    margin-bottom: 10px;
+    color: #e7c66f;
+    font-size: 24px;
+    font-weight: bold;
+}
+
+#pauseMenuText {
+    margin-bottom: 20px;
+    color: #eeeeee;
+    font-size: 15px;
+    line-height: 1.45;
+}
+
+.pauseMenuButton {
+    width: 100%;
+    padding: 12px 14px;
+    margin-top: 10px;
+    color: white;
+    background: #30303a;
+    border: 1px solid #666675;
+    border-radius: 7px;
+    font-size: 16px;
+    cursor: pointer;
+}
+
+.pauseMenuButton:hover {
+    background: #454555;
+}
+
+#pauseMenuClear {
+    background: #7d2525;
+    border-color: #b84b4b;
+}
+
+#pauseMenuClear:hover {
+    background: #993333;
+}

@@ -1,32 +1,113 @@
-const game = document.getElementById("game");
-const player = document.getElementById("player");
+const game =
+    document.getElementById("game");
 
+const player =
+    document.getElementById("player");
 
-// =====================================================
-// CONFIGURATION
-// =====================================================
+const interactionPrompt =
+    document.getElementById("interactionPrompt");
 
-const speed = 1.0;
+const interactionText =
+    document.getElementById("interactionText");
+
+const inventorySlots =
+    document.querySelectorAll(
+        ".inventorySlot"
+    );
+
+const SPEED = 1.0;
+const JUMP_HEIGHT = 22;
+const JUMP_SPEED = 0.11;
+const DOOR_INTERACTION_DISTANCE = 55;
+const COLOR_TOLERANCE = 55;
 
 const keys = {};
 
-let playerX = window.innerWidth * 0.50;
-let playerY = window.innerHeight * 0.55;
+let playerX =
+    game.clientWidth * 0.50;
 
+let playerY =
+    game.clientHeight * 0.55;
 
-// =====================================================
-// MASQUE DE COLLISION
-//
-// NOIR = BLOQUÉ
-// BLANC = AUTORISÉ
-// TRANSPARENT = AUTORISÉ
-// =====================================================
+let jumping = false;
+let jumpProgress = 0;
+let jumpOffset = 0;
 
-const collisionImage = new Image();
+let nearbyDoor = null;
+let collisionReady = false;
+let selectedInventorySlot = 0;
 
-collisionImage.src =
-    "/collisions/scene01_collision.png";
+const inventoryNames = {
+    mortier: "Mortier",
+    megaphone: "Mégaphone",
+    matraque: "Matraque",
+    bouclier: "Bouclier",
+    grenade_lbd: "Grenade LBD"
+};
 
+const doorTypes = [
+    {
+        name: "yellow",
+        r: 255,
+        g: 255,
+        b: 0,
+        scene: "scene02.html"
+    },
+    {
+        name: "red",
+        r: 255,
+        g: 0,
+        b: 0,
+        scene: "scene03.html"
+    },
+    {
+        name: "green",
+        r: 0,
+        g: 255,
+        b: 0,
+        scene: "scene04.html"
+    },
+    {
+        name: "blue",
+        r: 0,
+        g: 0,
+        b: 255,
+        scene: "scene05.html"
+    },
+    {
+        name: "pink",
+        r: 255,
+        g: 0,
+        b: 255,
+        scene: "scene06.html"
+    },
+    {
+        name: "cyan",
+        r: 0,
+        g: 255,
+        b: 255,
+        scene: "scene07.html"
+    },
+    {
+        name: "orange",
+        r: 255,
+        g: 128,
+        b: 0,
+        scene: "scene08.html"
+    },
+    {
+        name: "purple",
+        r: 128,
+        g: 0,
+        b: 255,
+        scene: "scene09.html"
+    }
+];
+
+const detectedDoors = [];
+
+const collisionImage =
+    new Image();
 
 const collisionCanvas =
     document.createElement("canvas");
@@ -39,31 +120,143 @@ const collisionContext =
         }
     );
 
+function getInventoryEntries() {
+    if (!window.EldoriaItems) {
+        return [];
+    }
 
-let collisionReady = false;
-let collisionEnabled = true;
+    const inventory =
+        EldoriaItems.getAll();
 
+    return Object.entries(
+        inventory
+    );
+}
 
-// =====================================================
-// CHARGEMENT DU MASQUE
-// =====================================================
+function renderInventory() {
+    const items =
+        getInventoryEntries();
+
+    inventorySlots.forEach(
+        (
+            slot,
+            index
+        ) => {
+            slot.innerHTML = "";
+
+            slot.classList.toggle(
+                "selected",
+                index === selectedInventorySlot
+            );
+
+            const number =
+                document.createElement(
+                    "span"
+                );
+
+            number.className =
+                "inventorySlotNumber";
+
+            number.textContent =
+                index + 1;
+
+            slot.appendChild(
+                number
+            );
+
+            if (!items[index]) {
+                return;
+            }
+
+            const [
+                itemId,
+                quantity
+            ] = items[index];
+
+            const itemName =
+                document.createElement(
+                    "span"
+                );
+
+            itemName.className =
+                "inventoryItemName";
+
+            itemName.textContent =
+                inventoryNames[itemId] ||
+                itemId;
+
+            slot.appendChild(
+                itemName
+            );
+
+            if (quantity > 1) {
+                const quantityText =
+                    document.createElement(
+                        "span"
+                    );
+
+                quantityText.className =
+                    "inventoryQuantity";
+
+                quantityText.textContent =
+                    quantity;
+
+                slot.appendChild(
+                    quantityText
+                );
+            }
+        }
+    );
+}
+
+function selectInventorySlot(
+    slotNumber
+) {
+    if (
+        slotNumber < 0 ||
+        slotNumber >=
+        inventorySlots.length
+    ) {
+        return;
+    }
+
+    selectedInventorySlot =
+        slotNumber;
+
+    renderInventory();
+}
+
+inventorySlots.forEach(
+    (
+        slot,
+        index
+    ) => {
+        slot.addEventListener(
+            "click",
+            (event) => {
+                event.stopPropagation();
+
+                selectInventorySlot(
+                    index
+                );
+            }
+        );
+    }
+);
+
+window.addEventListener(
+    "eldoriaInventoryChanged",
+    () => {
+        renderInventory();
+    }
+);
 
 collisionImage.onload = () => {
-
     collisionCanvas.width =
         collisionImage.naturalWidth;
 
     collisionCanvas.height =
         collisionImage.naturalHeight;
-
-
-    collisionContext.clearRect(
-        0,
-        0,
-        collisionCanvas.width,
-        collisionCanvas.height
-    );
-
 
     collisionContext.drawImage(
         collisionImage,
@@ -71,85 +264,281 @@ collisionImage.onload = () => {
         0
     );
 
-
     collisionReady = true;
 
-
-    console.log(
-        "Collision chargée :",
-        collisionCanvas.width,
-        "x",
-        collisionCanvas.height
-    );
-
+    detectDoors();
 };
-
 
 collisionImage.onerror = () => {
-
-    /*
-        IMPORTANT :
-        si le masque ne charge pas,
-        on NE BLOQUE PAS le joueur.
-    */
-
-    collisionEnabled = false;
-
-    console.warn(
-        "Masque de collision non chargé. " +
-        "Déplacements autorisés sans collision."
+    console.error(
+        "Impossible de charger scene01_collision.png"
     );
-
 };
 
+collisionImage.src =
+    "../assets/js/collisions/scene01_collision.png";
 
-// =====================================================
-// CLAVIER
-// =====================================================
+function colorMatches(
+    r1,
+    g1,
+    b1,
+    r2,
+    g2,
+    b2
+) {
+    return (
+        Math.abs(r1 - r2) <= COLOR_TOLERANCE &&
+        Math.abs(g1 - g2) <= COLOR_TOLERANCE &&
+        Math.abs(b1 - b2) <= COLOR_TOLERANCE
+    );
+}
+
+function getDoorTypeFromColor(
+    r,
+    g,
+    b
+) {
+    for (const door of doorTypes) {
+        if (
+            colorMatches(
+                r,
+                g,
+                b,
+                door.r,
+                door.g,
+                door.b
+            )
+        ) {
+            return door;
+        }
+    }
+
+    return null;
+}
+
+function detectDoors() {
+    detectedDoors.length = 0;
+
+    const width =
+        collisionCanvas.width;
+
+    const height =
+        collisionCanvas.height;
+
+    const data =
+        collisionContext.getImageData(
+            0,
+            0,
+            width,
+            height
+        ).data;
+
+    const visited =
+        new Uint8Array(
+            width * height
+        );
+
+    const step = 2;
+
+    for (
+        let startY = 0;
+        startY < height;
+        startY += step
+    ) {
+        for (
+            let startX = 0;
+            startX < width;
+            startX += step
+        ) {
+            const startIndex =
+                startY * width +
+                startX;
+
+            if (
+                visited[startIndex]
+            ) {
+                continue;
+            }
+
+            const dataIndex =
+                startIndex * 4;
+
+            const type =
+                getDoorTypeFromColor(
+                    data[dataIndex],
+                    data[dataIndex + 1],
+                    data[dataIndex + 2]
+                );
+
+            if (!type) {
+                continue;
+            }
+
+            const queue = [
+                {
+                    x: startX,
+                    y: startY
+                }
+            ];
+
+            visited[startIndex] = 1;
+
+            let totalX = 0;
+            let totalY = 0;
+            let count = 0;
+
+            while (
+                queue.length > 0
+            ) {
+                const current =
+                    queue.pop();
+
+                totalX += current.x;
+                totalY += current.y;
+                count++;
+
+                const neighbours = [
+                    {
+                        x: current.x + step,
+                        y: current.y
+                    },
+                    {
+                        x: current.x - step,
+                        y: current.y
+                    },
+                    {
+                        x: current.x,
+                        y: current.y + step
+                    },
+                    {
+                        x: current.x,
+                        y: current.y - step
+                    }
+                ];
+
+                for (
+                    const neighbour of neighbours
+                ) {
+                    if (
+                        neighbour.x < 0 ||
+                        neighbour.y < 0 ||
+                        neighbour.x >= width ||
+                        neighbour.y >= height
+                    ) {
+                        continue;
+                    }
+
+                    const neighbourIndex =
+                        neighbour.y * width +
+                        neighbour.x;
+
+                    if (
+                        visited[neighbourIndex]
+                    ) {
+                        continue;
+                    }
+
+                    const pixelIndex =
+                        neighbourIndex * 4;
+
+                    const neighbourType =
+                        getDoorTypeFromColor(
+                            data[pixelIndex],
+                            data[pixelIndex + 1],
+                            data[pixelIndex + 2]
+                        );
+
+                    if (
+                        !neighbourType ||
+                        neighbourType.name !==
+                        type.name
+                    ) {
+                        continue;
+                    }
+
+                    visited[neighbourIndex] = 1;
+
+                    queue.push(
+                        neighbour
+                    );
+                }
+            }
+
+            if (count > 1) {
+                detectedDoors.push({
+                    type,
+                    x: totalX / count,
+                    y: totalY / count
+                });
+            }
+        }
+    }
+}
 
 document.addEventListener(
     "keydown",
     (event) => {
+        const key =
+            event.key.toLowerCase();
 
-        keys[event.key.toLowerCase()] = true;
+        keys[key] = true;
 
+        if (
+            key >= "1" &&
+            key <= "9"
+        ) {
+            selectInventorySlot(
+                Number(key) - 1
+            );
+        }
+
+        if (
+            event.code === "Space" &&
+            !jumping
+        ) {
+            event.preventDefault();
+
+            jumping = true;
+            jumpProgress = 0;
+        }
+
+        if (
+            key === "e" &&
+            !event.repeat &&
+            nearbyDoor
+        ) {
+            window.location.href =
+                nearbyDoor.type.scene;
+        }
     }
 );
-
 
 document.addEventListener(
     "keyup",
     (event) => {
-
-        keys[event.key.toLowerCase()] = false;
-
+        keys[
+            event.key.toLowerCase()
+        ] = false;
     }
 );
 
-
-// =====================================================
-// CALCUL DU BACKGROUND
-//
-// Doit correspondre à :
-// background-size: cover
-// background-position: center
-// =====================================================
-
-function getBackgroundData() {
-
-    if (!collisionReady) {
-
-        return null;
-
+window.addEventListener(
+    "blur",
+    () => {
+        for (
+            const key in keys
+        ) {
+            keys[key] = false;
+        }
     }
+);
 
-
+function getBackgroundTransform() {
     const imageWidth =
         collisionCanvas.width;
 
     const imageHeight =
         collisionCanvas.height;
-
 
     const gameWidth =
         game.clientWidth;
@@ -157,13 +546,11 @@ function getBackgroundData() {
     const gameHeight =
         game.clientHeight;
 
-
     const scale =
-        Math.max(
+        Math.min(
             gameWidth / imageWidth,
             gameHeight / imageHeight
         );
-
 
     const renderedWidth =
         imageWidth * scale;
@@ -171,81 +558,60 @@ function getBackgroundData() {
     const renderedHeight =
         imageHeight * scale;
 
-
     const offsetX =
-        (gameWidth - renderedWidth) / 2;
+        (
+            gameWidth -
+            renderedWidth
+        ) / 2;
 
     const offsetY =
-        (gameHeight - renderedHeight) / 2;
-
+        (
+            gameHeight -
+            renderedHeight
+        ) / 2;
 
     return {
-
         scale,
         offsetX,
-        offsetY
-
+        offsetY,
+        renderedWidth,
+        renderedHeight
     };
-
 }
-
-
-// =====================================================
-// POSITION ÉCRAN -> POSITION DANS L'IMAGE
-// =====================================================
 
 function screenToMap(
     screenX,
     screenY
 ) {
-
-    const background =
-        getBackgroundData();
-
-
-    if (!background) {
-
-        return null;
-
-    }
-
+    const transform =
+        getBackgroundTransform();
 
     return {
-
-        x: Math.floor(
+        x:
             (
                 screenX -
-                background.offsetX
+                transform.offsetX
             ) /
-            background.scale
-        ),
+            transform.scale,
 
-        y: Math.floor(
+        y:
             (
                 screenY -
-                background.offsetY
+                transform.offsetY
             ) /
-            background.scale
-        )
-
+            transform.scale
     };
-
 }
 
-
-// =====================================================
-// TEST PIXEL NOIR
-// =====================================================
-
-function pixelIsBlocked(
+function getPixel(
     mapX,
     mapY
 ) {
+    mapX =
+        Math.floor(mapX);
 
-    /*
-        Hors de l'image :
-        on ne bloque PAS.
-    */
+    mapY =
+        Math.floor(mapY);
 
     if (
         mapX < 0 ||
@@ -253,178 +619,170 @@ function pixelIsBlocked(
         mapX >= collisionCanvas.width ||
         mapY >= collisionCanvas.height
     ) {
-
-        return false;
-
+        return null;
     }
 
-
-    try {
-
-        const pixel =
-            collisionContext.getImageData(
-                mapX,
-                mapY,
-                1,
-                1
-            ).data;
-
-
-        const r = pixel[0];
-        const g = pixel[1];
-        const b = pixel[2];
-        const a = pixel[3];
-
-
-        /*
-            Transparent = libre
-        */
-
-        if (a < 40) {
-
-            return false;
-
-        }
-
-
-        /*
-            Seulement le vrai noir / très foncé
-            bloque le joueur.
-        */
-
-        return (
-            r < 45 &&
-            g < 45 &&
-            b < 45
-        );
-
-
-    } catch (error) {
-
-        /*
-            TRÈS IMPORTANT :
-
-            Si Chrome bloque getImageData
-            par sécurité, on désactive la
-            collision au lieu de bloquer
-            complètement le personnage.
-        */
-
-        console.warn(
-            "Lecture du masque impossible.",
-            error
-        );
-
-
-        collisionEnabled = false;
-
-
-        return false;
-
-    }
-
+    return collisionContext.getImageData(
+        mapX,
+        mapY,
+        1,
+        1
+    ).data;
 }
 
+function isBlocked(
+    mapX,
+    mapY
+) {
+    const pixel =
+        getPixel(
+            mapX,
+            mapY
+        );
 
-// =====================================================
-// PEUT-ON MARCHER ?
-// =====================================================
+    if (!pixel) {
+        return true;
+    }
+
+    const r = pixel[0];
+    const g = pixel[1];
+    const b = pixel[2];
+
+    const door =
+        getDoorTypeFromColor(
+            r,
+            g,
+            b
+        );
+
+    if (door) {
+        return true;
+    }
+
+    return (
+        r < 100 &&
+        g < 100 &&
+        b < 100
+    );
+}
 
 function canWalk(
     screenX,
     screenY
 ) {
-
-    /*
-        Masque pas encore chargé :
-        on laisse bouger.
-    */
-
-    if (
-        !collisionReady ||
-        !collisionEnabled
-    ) {
-
+    if (!collisionReady) {
         return true;
-
     }
-
-
-    /*
-        On teste uniquement les pieds.
-        Pas la tête ni le corps complet.
-    */
 
     const feetY =
         screenY +
-        player.offsetHeight * 0.42;
-
-
-    /*
-        Petite largeur de collision aux pieds.
-        On teste 3 points seulement.
-    */
+        player.offsetHeight * 0.43;
 
     const points = [
-
         {
             x: screenX,
             y: feetY
         },
-
         {
-            x: screenX - 5,
+            x: screenX - 7,
             y: feetY
         },
-
         {
-            x: screenX + 5,
+            x: screenX + 7,
             y: feetY
+        },
+        {
+            x: screenX,
+            y: feetY + 3
         }
-
     ];
 
-
-    for (const point of points) {
-
-        const mapPosition =
+    for (
+        const point of points
+    ) {
+        const mapPoint =
             screenToMap(
                 point.x,
                 point.y
             );
 
-
-        if (!mapPosition) {
-
-            continue;
-
-        }
-
-
         if (
-            pixelIsBlocked(
-                mapPosition.x,
-                mapPosition.y
+            isBlocked(
+                mapPoint.x,
+                mapPoint.y
             )
         ) {
-
             return false;
-
         }
-
     }
 
-
     return true;
-
 }
 
+function updateDoorInteraction() {
+    nearbyDoor = null;
 
-// =====================================================
-// LIMITES DE L'ÉCRAN
-// =====================================================
+    interactionPrompt.classList.remove(
+        "visible"
+    );
 
-function keepPlayerInsideScreen() {
+    if (!collisionReady) {
+        return;
+    }
+
+    const playerMap =
+        screenToMap(
+            playerX,
+            playerY +
+            player.offsetHeight * 0.43
+        );
+
+    let closestDistance =
+        Infinity;
+
+    for (
+        const door of detectedDoors
+    ) {
+        const distance =
+            Math.hypot(
+                door.x -
+                playerMap.x,
+
+                door.y -
+                playerMap.y
+            );
+
+        if (
+            distance <=
+            DOOR_INTERACTION_DISTANCE &&
+            distance <
+            closestDistance
+        ) {
+            closestDistance =
+                distance;
+
+            nearbyDoor =
+                door;
+        }
+    }
+
+    if (nearbyDoor) {
+        interactionText.textContent =
+            "Entrer";
+
+        interactionPrompt.classList.add(
+            "visible"
+        );
+    }
+}
+
+function keepInsideMap() {
+    if (!collisionReady) {
+        return;
+    }
+
+    const transform =
+        getBackgroundTransform();
 
     const halfWidth =
         player.offsetWidth / 2;
@@ -432,129 +790,142 @@ function keepPlayerInsideScreen() {
     const halfHeight =
         player.offsetHeight / 2;
 
+    const minX =
+        transform.offsetX +
+        halfWidth;
+
+    const maxX =
+        transform.offsetX +
+        transform.renderedWidth -
+        halfWidth;
+
+    const minY =
+        transform.offsetY +
+        halfHeight;
+
+    const maxY =
+        transform.offsetY +
+        transform.renderedHeight -
+        halfHeight;
 
     playerX =
         Math.max(
-            halfWidth,
+            minX,
             Math.min(
-                game.clientWidth -
-                halfWidth,
+                maxX,
                 playerX
             )
         );
 
-
     playerY =
         Math.max(
-            halfHeight,
+            minY,
             Math.min(
-                game.clientHeight -
-                halfHeight,
+                maxY,
                 playerY
             )
         );
-
 }
 
+function updateJump() {
+    if (!jumping) {
+        jumpOffset = 0;
+        return;
+    }
 
-// =====================================================
-// DÉPLACEMENT
-// =====================================================
+    jumpProgress +=
+        JUMP_SPEED;
+
+    jumpOffset =
+        Math.sin(
+            jumpProgress
+        ) *
+        JUMP_HEIGHT;
+
+    if (
+        jumpProgress >=
+        Math.PI
+    ) {
+        jumping = false;
+        jumpProgress = 0;
+        jumpOffset = 0;
+    }
+}
 
 function update() {
+    let dx = 0;
+    let dy = 0;
 
-    let directionX = 0;
-    let directionY = 0;
-
-
-    // HAUT
+    const pauseMenuOpen =
+        window.EldoriaPauseMenu &&
+        EldoriaPauseMenu.isOpen();
 
     if (
-        keys["z"] ||
+        !pauseMenuOpen &&
+        (
+            keys["z"] ||
         keys["w"] ||
         keys["arrowup"]
+        )
     ) {
-
-        directionY -= 1;
-
+        dy -= 1;
     }
 
-
-    // BAS
-
     if (
+        !pauseMenuOpen &&
+        (
         keys["s"] ||
         keys["arrowdown"]
+        )
     ) {
-
-        directionY += 1;
-
+        dy += 1;
     }
 
-
-    // GAUCHE
-
     if (
+        !pauseMenuOpen &&
+        (
         keys["q"] ||
         keys["a"] ||
         keys["arrowleft"]
+        )
     ) {
-
-        directionX -= 1;
-
+        dx -= 1;
     }
 
-
-    // DROITE
-
     if (
+        !pauseMenuOpen &&
+        (
         keys["d"] ||
         keys["arrowright"]
+        )
     ) {
-
-        directionX += 1;
-
+        dx += 1;
     }
-
-
-    // =================================================
-    // NORMALISATION DIAGONALE
-    // =================================================
 
     if (
-        directionX !== 0 ||
-        directionY !== 0
+        dx !== 0 ||
+        dy !== 0
     ) {
-
         const length =
             Math.hypot(
-                directionX,
-                directionY
+                dx,
+                dy
             );
 
+        dx =
+            dx /
+            length *
+            SPEED;
 
-        directionX /= length;
-        directionY /= length;
-
+        dy =
+            dy /
+            length *
+            SPEED;
     }
 
-
-    const moveX =
-        directionX * speed;
-
-    const moveY =
-        directionY * speed;
-
-
-    // =================================================
-    // HORIZONTAL
-    // =================================================
-
-    if (moveX !== 0) {
-
+    if (dx !== 0) {
         const nextX =
-            playerX + moveX;
-
+            playerX + dx;
 
         if (
             canWalk(
@@ -562,24 +933,14 @@ function update() {
                 playerY
             )
         ) {
-
             playerX =
                 nextX;
-
         }
-
     }
 
-
-    // =================================================
-    // VERTICAL
-    // =================================================
-
-    if (moveY !== 0) {
-
+    if (dy !== 0) {
         const nextY =
-            playerY + moveY;
-
+            playerY + dy;
 
         if (
             canWalk(
@@ -587,102 +948,73 @@ function update() {
                 nextY
             )
         ) {
-
             playerY =
                 nextY;
-
         }
-
     }
 
-
-    keepPlayerInsideScreen();
-
+    keepInsideMap();
+    updateJump();
+    updateDoorInteraction();
 
     player.style.left =
         playerX + "px";
 
     player.style.top =
-        playerY + "px";
-
+        (
+            playerY -
+            jumpOffset
+        ) + "px";
 
     requestAnimationFrame(
         update
     );
-
 }
-
-
-// =====================================================
-// REDIMENSIONNEMENT
-// =====================================================
-
-window.addEventListener(
-    "resize",
-    () => {
-
-        keepPlayerInsideScreen();
-
-    }
-);
-
-
-// =====================================================
-// SOURIS
-// =====================================================
 
 game.addEventListener(
     "click",
-    () => {
+    (event) => {
+        if (
+            event.target.closest(
+                "#inventoryBar"
+            )
+        ) {
+            return;
+        }
 
         if (
             document.pointerLockElement !==
             game
         ) {
-
             game.requestPointerLock();
-
         }
-
     }
 );
-
 
 document.addEventListener(
     "pointerlockchange",
     () => {
-
         if (
             document.pointerLockElement ===
             game
         ) {
-
             game.classList.add(
                 "mouse-locked"
             );
-
         } else {
-
             game.classList.remove(
                 "mouse-locked"
             );
-
         }
-
     }
 );
 
-
-// =====================================================
-// SPAWN
-// =====================================================
-
-playerX =
-    game.clientWidth * 0.50;
-
-playerY =
-    game.clientHeight * 0.55;
-
+window.addEventListener(
+    "resize",
+    () => {
+        keepInsideMap();
+    }
+);
 
 player.style.left =
     playerX + "px";
@@ -690,9 +1022,5 @@ player.style.left =
 player.style.top =
     playerY + "px";
 
-
-// =====================================================
-// LANCEMENT
-// =====================================================
-
+renderInventory();
 update();
