@@ -1,0 +1,17 @@
+#player,
+#policier {
+    position: absolute;
+    transform: translate(-50%, -50%);
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+}
+
+#player {
+    z-index: 20;
+}
+
+#policier {
+    z-index: 15;
+}

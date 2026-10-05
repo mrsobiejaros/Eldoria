@@ -119,7 +119,12 @@ pauseMenuClear.addEventListener(
             "eldoria_progress_v1"
         );
 
-        window.location.reload();
+        localStorage.removeItem(
+            "eldoria_character_v1"
+        );
+
+        window.location.href =
+            "../index.html";
     }
 );
 

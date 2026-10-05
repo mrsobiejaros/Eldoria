@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Eldoria - Manifestation au lycée</title>
+
+    <link rel="stylesheet" href="../assets/css/characters.css">
+    <link rel="stylesheet" href="../assets/css/inventory.css">
+    <link rel="stylesheet" href="../assets/css/menu.css">
+    <link rel="stylesheet" href="../assets/css/scene03.css">
+</head>
+
+<body>
+
+    <main id="game">
+
+        <div id="sceneWorld"></div>
+
+        <div id="npcLayer"></div>
+
+        <div id="effectsLayer"></div>
+
+        <div id="player">
+            <div id="youLabel">YOU</div>
+        </div>
+
+        <div id="sceneHud">
+            <div id="sceneTitle">
+                Manifestation au lycée
+            </div>
+
+            <div id="roleName"></div>
+
+            <div id="objectiveText"></div>
+
+            <div id="healthRow">
+                <span>Vie</span>
+
+                <div id="healthTrack">
+                    <div id="healthFill"></div>
+                </div>
+
+                <span id="healthValue">
+                    100
+                </span>
+            </div>
+        </div>
+
+        <div id="gameMessage"></div>
+
+        <button
+            id="leaveScene"
+            type="button"
+        >
+            E - Quitter
+        </button>
+
+    </main>
+
+    <script src="../assets/js/characters.js"></script>
+    <script src="../assets/js/inventory.js"></script>
+    <script src="../assets/js/scene03.js"></script>
+    <script src="../assets/js/menu.js"></script>
+
+</body>
+</html>

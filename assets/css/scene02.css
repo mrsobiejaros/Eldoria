@@ -14,90 +14,43 @@ body {
 
 #game {
     position: relative;
-
     width: 100vw;
     height: 100vh;
-
     overflow: hidden;
-
     background-image: url("../backgrounds/scene02.png");
     background-size: contain;
     background-position: center;
     background-repeat: no-repeat;
-
     background-color: black;
 }
 
 #player {
-    position: absolute;
-
-    width: 90px;
-    height: 120px;
-
     left: 50%;
     top: 72%;
-
-    transform: translate(-50%, -50%);
-
-    background-image: url("../characters/player_men.png");
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-
-    image-rendering: pixelated;
-
-    z-index: 20;
 }
 
 #policier {
-    position: absolute;
-
-    width: 105px;
-    height: 150px;
-
     left: 77%;
     top: 33%;
-
-    transform: translate(-50%, -50%);
-
-    background-image: url("../characters/policier.png");
-    background-size: contain;
-    background-position: center;
-    background-repeat: no-repeat;
-
-    image-rendering: pixelated;
-
-    z-index: 15;
 }
 
 #interactionPrompt {
     position: absolute;
-
     left: 50%;
-    bottom: 55px;
-
+    bottom: 102px;
     transform: translateX(-50%);
-
     display: none;
     align-items: center;
     gap: 10px;
-
     padding: 10px 16px;
-
     color: white;
-
     font-family: Arial, sans-serif;
     font-size: 16px;
     font-weight: bold;
-
-    background: rgba(10, 10, 15, 0.9);
-
+    background: rgba(10, 10, 15, 0.92);
     border: 2px solid rgba(255, 255, 255, 0.7);
-
     border-radius: 8px;
-
-    z-index: 100;
-
+    z-index: 180;
     pointer-events: none;
 }
 
@@ -107,33 +60,23 @@ body {
 
 .interactionKey {
     display: flex;
-
     width: 28px;
     height: 28px;
-
     align-items: center;
     justify-content: center;
-
     color: black;
     background: white;
-
     border-radius: 5px;
 }
 
 #dialogueOverlay {
     position: absolute;
-
     inset: 0;
-
     display: none;
-
     align-items: flex-end;
     justify-content: center;
-
-    padding-bottom: 45px;
-
+    padding-bottom: 102px;
     background: rgba(0, 0, 0, 0.15);
-
     z-index: 200;
 }
 
@@ -143,19 +86,12 @@ body {
 
 #dialogueBox {
     width: min(760px, 90vw);
-
     padding: 22px;
-
     background: rgba(18, 18, 24, 0.96);
-
     border: 3px solid #d5b56b;
-
     border-radius: 12px;
-
     color: white;
-
     font-family: Arial, sans-serif;
-
     box-shadow:
         0 0 0 3px rgba(0, 0, 0, 0.6),
         0 12px 35px rgba(0, 0, 0, 0.55);
@@ -163,16 +99,13 @@ body {
 
 #dialogueName {
     margin-bottom: 12px;
-
     color: #e7c66f;
-
     font-size: 20px;
     font-weight: bold;
 }
 
 #dialogueText {
     margin-bottom: 20px;
-
     font-size: 18px;
     line-height: 1.5;
 }
@@ -180,25 +113,18 @@ body {
 #dialogueChoices {
     display: flex;
     flex-direction: column;
-
     gap: 10px;
 }
 
 .dialogueChoice {
     width: 100%;
-
     padding: 12px 14px;
-
     color: white;
     background: #30303a;
-
     border: 1px solid #666675;
     border-radius: 7px;
-
     font-size: 16px;
-
     cursor: pointer;
-
     text-align: left;
 }
 
@@ -208,89 +134,4 @@ body {
 
 #game.mouse-locked {
     cursor: none;
-}
-
-#inventoryBar {
-    position: absolute;
-    left: 50%;
-    bottom: 14px;
-    transform: translateX(-50%);
-    display: flex;
-    gap: 4px;
-    padding: 5px;
-    background: rgba(15, 15, 20, 0.86);
-    border: 2px solid rgba(220, 190, 120, 0.85);
-    border-radius: 8px;
-    z-index: 160;
-    user-select: none;
-}
-
-.inventorySlot {
-    position: relative;
-    width: 58px;
-    height: 58px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 4px;
-    background: rgba(45, 45, 55, 0.94);
-    border: 2px solid rgba(120, 120, 130, 0.9);
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-.inventorySlot:hover {
-    background: rgba(70, 70, 85, 0.96);
-}
-
-.inventorySlot.selected {
-    border-color: #ffd76a;
-    box-shadow:
-        0 0 0 2px rgba(255, 215, 106, 0.3),
-        0 0 12px rgba(255, 215, 106, 0.8);
-}
-
-.inventorySlotNumber {
-    position: absolute;
-    top: 2px;
-    left: 4px;
-    color: rgba(255, 255, 255, 0.7);
-    font-family: Arial, sans-serif;
-    font-size: 10px;
-}
-
-.inventoryItemIcon {
-    width: 38px;
-    height: 38px;
-    object-fit: contain;
-    image-rendering: pixelated;
-    pointer-events: none;
-}
-
-.inventoryQuantity {
-    position: absolute;
-    right: 4px;
-    bottom: 2px;
-    color: white;
-    font-family: Arial, sans-serif;
-    font-size: 12px;
-    font-weight: bold;
-    text-shadow: 1px 1px 2px black;
-}
-
-@media (max-width: 750px) {
-    #inventoryBar {
-        gap: 2px;
-        padding: 4px;
-    }
-
-    .inventorySlot {
-        width: 44px;
-        height: 44px;
-    }
-
-    .inventoryItemIcon {
-        width: 30px;
-        height: 30px;
-    }
 }

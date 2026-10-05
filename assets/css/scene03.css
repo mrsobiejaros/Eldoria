@@ -1,0 +1,302 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+    background: black;
+    font-family: Arial, sans-serif;
+}
+
+#game {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+    background: black;
+}
+
+#sceneWorld {
+    position: absolute;
+    inset: 0;
+    background-image: url("../backgrounds/scene03.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+#sceneWorld::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(
+            to bottom,
+            rgba(0, 0, 0, 0.08),
+            transparent 35%,
+            transparent 70%,
+            rgba(0, 0, 0, 0.25)
+        );
+    pointer-events: none;
+}
+
+#npcLayer,
+#effectsLayer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+}
+
+#player {
+    position: absolute;
+    width: 82px;
+    height: 112px;
+    left: 50%;
+    top: 72%;
+    transform: translate(-50%, -50%);
+    background-size: contain;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    filter:
+        drop-shadow(
+            0 6px 3px
+            rgba(0, 0, 0, 0.6)
+        );
+    z-index: 80;
+}
+
+#youLabel {
+    position: absolute;
+    left: 50%;
+    top: -26px;
+    transform: translateX(-50%);
+    padding: 3px 8px;
+    color: white;
+    background: rgba(8, 10, 16, 0.9);
+    border: 2px solid white;
+    border-radius: 5px;
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 1px;
+    text-shadow: 1px 1px 2px black;
+    pointer-events: none;
+}
+
+#youLabel::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    bottom: -8px;
+    transform: translateX(-50%);
+    width: 0;
+    height: 0;
+    border-left: 6px solid transparent;
+    border-right: 6px solid transparent;
+    border-top: 7px solid white;
+}
+
+.sceneNpc {
+    position: absolute;
+    width: 72px;
+    height: 98px;
+    transform: translate(-50%, -50%);
+    background-size: contain;
+    background-position: center bottom;
+    background-repeat: no-repeat;
+    image-rendering: pixelated;
+    filter:
+        drop-shadow(
+            0 5px 3px
+            rgba(0, 0, 0, 0.55)
+        );
+    transition:
+        left 0.75s linear,
+        top 0.75s linear,
+        opacity 0.2s ease,
+        filter 0.15s ease;
+    z-index: 65;
+}
+
+.sceneNpc.hit {
+    filter:
+        brightness(1.8)
+        drop-shadow(
+            0 5px 3px
+            rgba(0, 0, 0, 0.55)
+        );
+}
+
+.sceneNpc.down {
+    opacity: 0.15;
+}
+
+.sceneNpcLabel {
+    position: absolute;
+    left: 50%;
+    bottom: -17px;
+    transform: translateX(-50%);
+    padding: 2px 5px;
+    white-space: nowrap;
+    color: white;
+    background: rgba(10, 10, 15, 0.76);
+    border-radius: 4px;
+    font-size: 9px;
+    font-weight: bold;
+}
+
+#sceneHud {
+    position: absolute;
+    left: 18px;
+    top: 18px;
+    width: min(420px, calc(100vw - 36px));
+    padding: 14px 16px;
+    color: white;
+    background: rgba(10, 12, 18, 0.9);
+    border: 2px solid rgba(255, 255, 255, 0.5);
+    border-radius: 10px;
+    z-index: 150;
+    pointer-events: none;
+}
+
+#sceneTitle {
+    margin-bottom: 8px;
+    color: #e7c66f;
+    font-size: 21px;
+    font-weight: bold;
+}
+
+#roleName {
+    margin-bottom: 6px;
+    font-size: 17px;
+    font-weight: bold;
+}
+
+#objectiveText {
+    color: #ededed;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+#healthRow {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 12px;
+    font-size: 12px;
+    font-weight: bold;
+}
+
+#healthTrack {
+    flex: 1;
+    height: 11px;
+    overflow: hidden;
+    background: #272733;
+    border: 1px solid rgba(255, 255, 255, 0.45);
+    border-radius: 999px;
+}
+
+#healthFill {
+    width: 100%;
+    height: 100%;
+    background: #e34b4b;
+}
+
+#gameMessage {
+    position: absolute;
+    left: 50%;
+    top: 25%;
+    transform: translateX(-50%);
+    padding: 10px 16px;
+    color: white;
+    background: rgba(10, 10, 15, 0.9);
+    border-radius: 7px;
+    font-size: 16px;
+    font-weight: bold;
+    opacity: 0;
+    transition: opacity 0.18s ease;
+    z-index: 175;
+    pointer-events: none;
+}
+
+#gameMessage.visible {
+    opacity: 1;
+}
+
+#leaveScene {
+    position: absolute;
+    left: 18px;
+    bottom: 98px;
+    padding: 10px 14px;
+    color: white;
+    background: rgba(15, 15, 20, 0.92);
+    border: 2px solid #d5b56b;
+    border-radius: 7px;
+    font-size: 14px;
+    font-weight: bold;
+    cursor: pointer;
+    z-index: 175;
+}
+
+.projectile {
+    position: absolute;
+    width: 11px;
+    height: 11px;
+    transform: translate(-50%, -50%);
+    border-radius: 50%;
+    background: #f1c84c;
+    box-shadow:
+        0 0 8px #ff8b00,
+        0 0 16px rgba(255, 85, 0, 0.95);
+    z-index: 100;
+}
+
+.impact {
+    position: absolute;
+    width: 24px;
+    height: 24px;
+    transform: translate(-50%, -50%);
+    border: 3px solid rgba(255, 215, 100, 0.95);
+    border-radius: 50%;
+    animation:
+        impactAnim
+        0.45s
+        ease-out
+        forwards;
+    z-index: 105;
+}
+
+@keyframes impactAnim {
+    from {
+        width: 24px;
+        height: 24px;
+        opacity: 1;
+    }
+
+    to {
+        width: 110px;
+        height: 110px;
+        opacity: 0;
+    }
+}
+
+#inventoryBar {
+    z-index: 160;
+}
+
+@media (max-width: 850px) {
+    #sceneHud {
+        width: 320px;
+    }
+
+    #player {
+        width: 68px;
+        height: 94px;
+    }
+}

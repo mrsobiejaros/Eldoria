@@ -5,15 +5,27 @@ const player =
     document.getElementById("player");
 
 const interactionPrompt =
-    document.getElementById("interactionPrompt");
+    document.getElementById(
+        "interactionPrompt"
+    );
 
 const interactionText =
-    document.getElementById("interactionText");
-
-const inventorySlots =
-    document.querySelectorAll(
-        ".inventorySlot"
+    document.getElementById(
+        "interactionText"
     );
+
+EldoriaCharacters.applySceneCharacters(
+    "scene01"
+);
+
+window.addEventListener(
+    "eldoriaCharacterChanged",
+    () => {
+        EldoriaCharacters.applySceneCharacters(
+            "scene01"
+        );
+    }
+);
 
 const SPEED = 1.0;
 const JUMP_HEIGHT = 22;
@@ -32,83 +44,23 @@ let playerY =
 let jumping = false;
 let jumpProgress = 0;
 let jumpOffset = 0;
-
 let nearbyDoor = null;
 let collisionReady = false;
-let selectedInventorySlot = 0;
-
-const inventoryNames = {
-    mortier: "Mortier",
-    megaphone: "Mégaphone",
-    matraque: "Matraque",
-    bouclier: "Bouclier",
-    grenade_lbd: "Grenade LBD"
-};
 
 const doorTypes = [
-    {
-        name: "yellow",
-        r: 255,
-        g: 255,
-        b: 0,
-        scene: "scene02.html"
-    },
-    {
-        name: "red",
-        r: 255,
-        g: 0,
-        b: 0,
-        scene: "scene03.html"
-    },
-    {
-        name: "green",
-        r: 0,
-        g: 255,
-        b: 0,
-        scene: "scene04.html"
-    },
-    {
-        name: "blue",
-        r: 0,
-        g: 0,
-        b: 255,
-        scene: "scene05.html"
-    },
-    {
-        name: "pink",
-        r: 255,
-        g: 0,
-        b: 255,
-        scene: "scene06.html"
-    },
-    {
-        name: "cyan",
-        r: 0,
-        g: 255,
-        b: 255,
-        scene: "scene07.html"
-    },
-    {
-        name: "orange",
-        r: 255,
-        g: 128,
-        b: 0,
-        scene: "scene08.html"
-    },
-    {
-        name: "purple",
-        r: 128,
-        g: 0,
-        b: 255,
-        scene: "scene09.html"
-    }
+    { name: "yellow", r: 255, g: 255, b: 0, scene: "scene02.html" },
+    { name: "red", r: 255, g: 0, b: 0, scene: "scene03.html" },
+    { name: "green", r: 0, g: 255, b: 0, scene: "scene04.html" },
+    { name: "blue", r: 0, g: 0, b: 255, scene: "scene05.html" },
+    { name: "pink", r: 255, g: 0, b: 255, scene: "scene06.html" },
+    { name: "cyan", r: 0, g: 255, b: 255, scene: "scene07.html" },
+    { name: "orange", r: 255, g: 128, b: 0, scene: "scene08.html" },
+    { name: "purple", r: 128, g: 0, b: 255, scene: "scene09.html" }
 ];
 
 const detectedDoors = [];
 
-const collisionImage =
-    new Image();
-
+const collisionImage = new Image();
 const collisionCanvas =
     document.createElement("canvas");
 
@@ -119,137 +71,6 @@ const collisionContext =
             willReadFrequently: true
         }
     );
-
-function getInventoryEntries() {
-    if (!window.EldoriaItems) {
-        return [];
-    }
-
-    const inventory =
-        EldoriaItems.getAll();
-
-    return Object.entries(
-        inventory
-    );
-}
-
-function renderInventory() {
-    const items =
-        getInventoryEntries();
-
-    inventorySlots.forEach(
-        (
-            slot,
-            index
-        ) => {
-            slot.innerHTML = "";
-
-            slot.classList.toggle(
-                "selected",
-                index === selectedInventorySlot
-            );
-
-            const number =
-                document.createElement(
-                    "span"
-                );
-
-            number.className =
-                "inventorySlotNumber";
-
-            number.textContent =
-                index + 1;
-
-            slot.appendChild(
-                number
-            );
-
-            if (!items[index]) {
-                return;
-            }
-
-            const [
-                itemId,
-                quantity
-            ] = items[index];
-
-            const itemName =
-                document.createElement(
-                    "span"
-                );
-
-            itemName.className =
-                "inventoryItemName";
-
-            itemName.textContent =
-                inventoryNames[itemId] ||
-                itemId;
-
-            slot.appendChild(
-                itemName
-            );
-
-            if (quantity > 1) {
-                const quantityText =
-                    document.createElement(
-                        "span"
-                    );
-
-                quantityText.className =
-                    "inventoryQuantity";
-
-                quantityText.textContent =
-                    quantity;
-
-                slot.appendChild(
-                    quantityText
-                );
-            }
-        }
-    );
-}
-
-function selectInventorySlot(
-    slotNumber
-) {
-    if (
-        slotNumber < 0 ||
-        slotNumber >=
-        inventorySlots.length
-    ) {
-        return;
-    }
-
-    selectedInventorySlot =
-        slotNumber;
-
-    renderInventory();
-}
-
-inventorySlots.forEach(
-    (
-        slot,
-        index
-    ) => {
-        slot.addEventListener(
-            "click",
-            (event) => {
-                event.stopPropagation();
-
-                selectInventorySlot(
-                    index
-                );
-            }
-        );
-    }
-);
-
-window.addEventListener(
-    "eldoriaInventoryChanged",
-    () => {
-        renderInventory();
-    }
-);
 
 collisionImage.onload = () => {
     collisionCanvas.width =
@@ -265,7 +86,6 @@ collisionImage.onload = () => {
     );
 
     collisionReady = true;
-
     detectDoors();
 };
 
@@ -298,8 +118,8 @@ function getDoorTypeFromColor(
     g,
     b
 ) {
-    for (const door of doorTypes) {
-        if (
+    return doorTypes.find(
+        door =>
             colorMatches(
                 r,
                 g,
@@ -308,12 +128,7 @@ function getDoorTypeFromColor(
                 door.g,
                 door.b
             )
-        ) {
-            return door;
-        }
-    }
-
-    return null;
+    ) || null;
 }
 
 function detectDoors() {
@@ -333,205 +148,52 @@ function detectDoors() {
             height
         ).data;
 
-    const visited =
-        new Uint8Array(
-            width * height
-        );
-
-    const step = 2;
-
     for (
-        let startY = 0;
-        startY < height;
-        startY += step
+        const type of doorTypes
     ) {
+        let totalX = 0;
+        let totalY = 0;
+        let count = 0;
+
         for (
-            let startX = 0;
-            startX < width;
-            startX += step
+            let y = 0;
+            y < height;
+            y += 2
         ) {
-            const startIndex =
-                startY * width +
-                startX;
-
-            if (
-                visited[startIndex]
+            for (
+                let x = 0;
+                x < width;
+                x += 2
             ) {
-                continue;
-            }
+                const i =
+                    (y * width + x) * 4;
 
-            const dataIndex =
-                startIndex * 4;
-
-            const type =
-                getDoorTypeFromColor(
-                    data[dataIndex],
-                    data[dataIndex + 1],
-                    data[dataIndex + 2]
-                );
-
-            if (!type) {
-                continue;
-            }
-
-            const queue = [
-                {
-                    x: startX,
-                    y: startY
-                }
-            ];
-
-            visited[startIndex] = 1;
-
-            let totalX = 0;
-            let totalY = 0;
-            let count = 0;
-
-            while (
-                queue.length > 0
-            ) {
-                const current =
-                    queue.pop();
-
-                totalX += current.x;
-                totalY += current.y;
-                count++;
-
-                const neighbours = [
-                    {
-                        x: current.x + step,
-                        y: current.y
-                    },
-                    {
-                        x: current.x - step,
-                        y: current.y
-                    },
-                    {
-                        x: current.x,
-                        y: current.y + step
-                    },
-                    {
-                        x: current.x,
-                        y: current.y - step
-                    }
-                ];
-
-                for (
-                    const neighbour of neighbours
+                if (
+                    colorMatches(
+                        data[i],
+                        data[i + 1],
+                        data[i + 2],
+                        type.r,
+                        type.g,
+                        type.b
+                    )
                 ) {
-                    if (
-                        neighbour.x < 0 ||
-                        neighbour.y < 0 ||
-                        neighbour.x >= width ||
-                        neighbour.y >= height
-                    ) {
-                        continue;
-                    }
-
-                    const neighbourIndex =
-                        neighbour.y * width +
-                        neighbour.x;
-
-                    if (
-                        visited[neighbourIndex]
-                    ) {
-                        continue;
-                    }
-
-                    const pixelIndex =
-                        neighbourIndex * 4;
-
-                    const neighbourType =
-                        getDoorTypeFromColor(
-                            data[pixelIndex],
-                            data[pixelIndex + 1],
-                            data[pixelIndex + 2]
-                        );
-
-                    if (
-                        !neighbourType ||
-                        neighbourType.name !==
-                        type.name
-                    ) {
-                        continue;
-                    }
-
-                    visited[neighbourIndex] = 1;
-
-                    queue.push(
-                        neighbour
-                    );
+                    totalX += x;
+                    totalY += y;
+                    count++;
                 }
             }
+        }
 
-            if (count > 1) {
-                detectedDoors.push({
-                    type,
-                    x: totalX / count,
-                    y: totalY / count
-                });
-            }
+        if (count > 0) {
+            detectedDoors.push({
+                type,
+                x: totalX / count,
+                y: totalY / count
+            });
         }
     }
 }
-
-document.addEventListener(
-    "keydown",
-    (event) => {
-        const key =
-            event.key.toLowerCase();
-
-        keys[key] = true;
-
-        if (
-            key >= "1" &&
-            key <= "9"
-        ) {
-            selectInventorySlot(
-                Number(key) - 1
-            );
-        }
-
-        if (
-            event.code === "Space" &&
-            !jumping
-        ) {
-            event.preventDefault();
-
-            jumping = true;
-            jumpProgress = 0;
-        }
-
-        if (
-            key === "e" &&
-            !event.repeat &&
-            nearbyDoor
-        ) {
-            window.location.href =
-                nearbyDoor.type.scene;
-        }
-    }
-);
-
-document.addEventListener(
-    "keyup",
-    (event) => {
-        keys[
-            event.key.toLowerCase()
-        ] = false;
-    }
-);
-
-window.addEventListener(
-    "blur",
-    () => {
-        for (
-            const key in keys
-        ) {
-            keys[key] = false;
-        }
-    }
-);
 
 function getBackgroundTransform() {
     const imageWidth =
@@ -558,24 +220,14 @@ function getBackgroundTransform() {
     const renderedHeight =
         imageHeight * scale;
 
-    const offsetX =
-        (
-            gameWidth -
-            renderedWidth
-        ) / 2;
-
-    const offsetY =
-        (
-            gameHeight -
-            renderedHeight
-        ) / 2;
-
     return {
         scale,
-        offsetX,
-        offsetY,
         renderedWidth,
-        renderedHeight
+        renderedHeight,
+        offsetX:
+            (gameWidth - renderedWidth) / 2,
+        offsetY:
+            (gameHeight - renderedHeight) / 2
     };
 }
 
@@ -588,17 +240,10 @@ function screenToMap(
 
     return {
         x:
-            (
-                screenX -
-                transform.offsetX
-            ) /
+            (screenX - transform.offsetX) /
             transform.scale,
-
         y:
-            (
-                screenY -
-                transform.offsetY
-            ) /
+            (screenY - transform.offsetY) /
             transform.scale
     };
 }
@@ -607,11 +252,8 @@ function getPixel(
     mapX,
     mapY
 ) {
-    mapX =
-        Math.floor(mapX);
-
-    mapY =
-        Math.floor(mapY);
+    mapX = Math.floor(mapX);
+    mapY = Math.floor(mapY);
 
     if (
         mapX < 0 ||
@@ -648,14 +290,13 @@ function isBlocked(
     const g = pixel[1];
     const b = pixel[2];
 
-    const door =
+    if (
         getDoorTypeFromColor(
             r,
             g,
             b
-        );
-
-    if (door) {
+        )
+    ) {
         return true;
     }
 
@@ -679,44 +320,26 @@ function canWalk(
         player.offsetHeight * 0.43;
 
     const points = [
-        {
-            x: screenX,
-            y: feetY
-        },
-        {
-            x: screenX - 7,
-            y: feetY
-        },
-        {
-            x: screenX + 7,
-            y: feetY
-        },
-        {
-            x: screenX,
-            y: feetY + 3
-        }
+        { x: screenX, y: feetY },
+        { x: screenX - 7, y: feetY },
+        { x: screenX + 7, y: feetY },
+        { x: screenX, y: feetY + 3 }
     ];
 
-    for (
-        const point of points
-    ) {
-        const mapPoint =
-            screenToMap(
-                point.x,
-                point.y
-            );
+    return points.every(
+        point => {
+            const mapPoint =
+                screenToMap(
+                    point.x,
+                    point.y
+                );
 
-        if (
-            isBlocked(
+            return !isBlocked(
                 mapPoint.x,
                 mapPoint.y
-            )
-        ) {
-            return false;
+            );
         }
-    }
-
-    return true;
+    );
 }
 
 function updateDoorInteraction() {
@@ -734,35 +357,27 @@ function updateDoorInteraction() {
         screenToMap(
             playerX,
             playerY +
-            player.offsetHeight * 0.43
+                player.offsetHeight * 0.43
         );
 
-    let closestDistance =
-        Infinity;
+    let closestDistance = Infinity;
 
     for (
         const door of detectedDoors
     ) {
         const distance =
             Math.hypot(
-                door.x -
-                playerMap.x,
-
-                door.y -
-                playerMap.y
+                door.x - playerMap.x,
+                door.y - playerMap.y
             );
 
         if (
             distance <=
-            DOOR_INTERACTION_DISTANCE &&
-            distance <
-            closestDistance
+                DOOR_INTERACTION_DISTANCE &&
+            distance < closestDistance
         ) {
-            closestDistance =
-                distance;
-
-            nearbyDoor =
-                door;
+            closestDistance = distance;
+            nearbyDoor = door;
         }
     }
 
@@ -790,41 +405,25 @@ function keepInsideMap() {
     const halfHeight =
         player.offsetHeight / 2;
 
-    const minX =
-        transform.offsetX +
-        halfWidth;
+    playerX = Math.max(
+        transform.offsetX + halfWidth,
+        Math.min(
+            transform.offsetX +
+                transform.renderedWidth -
+                halfWidth,
+            playerX
+        )
+    );
 
-    const maxX =
-        transform.offsetX +
-        transform.renderedWidth -
-        halfWidth;
-
-    const minY =
-        transform.offsetY +
-        halfHeight;
-
-    const maxY =
-        transform.offsetY +
-        transform.renderedHeight -
-        halfHeight;
-
-    playerX =
-        Math.max(
-            minX,
-            Math.min(
-                maxX,
-                playerX
-            )
-        );
-
-    playerY =
-        Math.max(
-            minY,
-            Math.min(
-                maxY,
-                playerY
-            )
-        );
+    playerY = Math.max(
+        transform.offsetY + halfHeight,
+        Math.min(
+            transform.offsetY +
+                transform.renderedHeight -
+                halfHeight,
+            playerY
+        )
+    );
 }
 
 function updateJump() {
@@ -833,18 +432,14 @@ function updateJump() {
         return;
     }
 
-    jumpProgress +=
-        JUMP_SPEED;
+    jumpProgress += JUMP_SPEED;
 
     jumpOffset =
-        Math.sin(
-            jumpProgress
-        ) *
+        Math.sin(jumpProgress) *
         JUMP_HEIGHT;
 
     if (
-        jumpProgress >=
-        Math.PI
+        jumpProgress >= Math.PI
     ) {
         jumping = false;
         jumpProgress = 0;
@@ -852,54 +447,97 @@ function updateJump() {
     }
 }
 
+function isGamePaused() {
+    return Boolean(
+        window.EldoriaPauseMenu &&
+        EldoriaPauseMenu.isOpen()
+    );
+}
+
+document.addEventListener(
+    "keydown",
+    event => {
+        const key =
+            event.key.toLowerCase();
+
+        keys[key] = true;
+
+        if (
+            event.code === "Space" &&
+            !jumping &&
+            !isGamePaused()
+        ) {
+            event.preventDefault();
+            jumping = true;
+            jumpProgress = 0;
+        }
+
+        if (
+            key === "e" &&
+            !event.repeat &&
+            nearbyDoor &&
+            !isGamePaused()
+        ) {
+            window.location.href =
+                nearbyDoor.type.scene;
+        }
+    }
+);
+
+document.addEventListener(
+    "keyup",
+    event => {
+        keys[
+            event.key.toLowerCase()
+        ] = false;
+    }
+);
+
+window.addEventListener(
+    "blur",
+    () => {
+        for (
+            const key in keys
+        ) {
+            keys[key] = false;
+        }
+    }
+);
+
 function update() {
     let dx = 0;
     let dy = 0;
 
-    const pauseMenuOpen =
-        window.EldoriaPauseMenu &&
-        EldoriaPauseMenu.isOpen();
-
-    if (
-        !pauseMenuOpen &&
-        (
+    if (!isGamePaused()) {
+        if (
             keys["z"] ||
-        keys["w"] ||
-        keys["arrowup"]
-        )
-    ) {
-        dy -= 1;
-    }
+            keys["w"] ||
+            keys["arrowup"]
+        ) {
+            dy -= 1;
+        }
 
-    if (
-        !pauseMenuOpen &&
-        (
-        keys["s"] ||
-        keys["arrowdown"]
-        )
-    ) {
-        dy += 1;
-    }
+        if (
+            keys["s"] ||
+            keys["arrowdown"]
+        ) {
+            dy += 1;
+        }
 
-    if (
-        !pauseMenuOpen &&
-        (
-        keys["q"] ||
-        keys["a"] ||
-        keys["arrowleft"]
-        )
-    ) {
-        dx -= 1;
-    }
+        if (
+            keys["q"] ||
+            keys["a"] ||
+            keys["arrowleft"]
+        ) {
+            dx -= 1;
+        }
 
-    if (
-        !pauseMenuOpen &&
-        (
-        keys["d"] ||
-        keys["arrowright"]
-        )
-    ) {
-        dx += 1;
+        if (
+            keys["d"] ||
+            keys["arrowright"]
+        ) {
+            dx += 1;
+        }
     }
 
     if (
@@ -907,20 +545,13 @@ function update() {
         dy !== 0
     ) {
         const length =
-            Math.hypot(
-                dx,
-                dy
-            );
+            Math.hypot(dx, dy);
 
         dx =
-            dx /
-            length *
-            SPEED;
+            dx / length * SPEED;
 
         dy =
-            dy /
-            length *
-            SPEED;
+            dy / length * SPEED;
     }
 
     if (dx !== 0) {
@@ -933,8 +564,7 @@ function update() {
                 playerY
             )
         ) {
-            playerX =
-                nextX;
+            playerX = nextX;
         }
     }
 
@@ -948,8 +578,7 @@ function update() {
                 nextY
             )
         ) {
-            playerY =
-                nextY;
+            playerY = nextY;
         }
     }
 
@@ -961,23 +590,20 @@ function update() {
         playerX + "px";
 
     player.style.top =
-        (
-            playerY -
-            jumpOffset
-        ) + "px";
+        (playerY - jumpOffset) +
+        "px";
 
-    requestAnimationFrame(
-        update
-    );
+    requestAnimationFrame(update);
 }
 
 game.addEventListener(
     "click",
-    (event) => {
+    event => {
         if (
             event.target.closest(
                 "#inventoryBar"
-            )
+            ) ||
+            isGamePaused()
         ) {
             return;
         }
@@ -994,26 +620,17 @@ game.addEventListener(
 document.addEventListener(
     "pointerlockchange",
     () => {
-        if (
+        game.classList.toggle(
+            "mouse-locked",
             document.pointerLockElement ===
-            game
-        ) {
-            game.classList.add(
-                "mouse-locked"
-            );
-        } else {
-            game.classList.remove(
-                "mouse-locked"
-            );
-        }
+                game
+        );
     }
 );
 
 window.addEventListener(
     "resize",
-    () => {
-        keepInsideMap();
-    }
+    keepInsideMap
 );
 
 player.style.left =
@@ -1022,5 +639,4 @@ player.style.left =
 player.style.top =
     playerY + "px";
 
-renderInventory();
 update();

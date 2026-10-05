@@ -1,0 +1,108 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    overflow: hidden;
+    font-family: Arial, sans-serif;
+    background: #0b0d13;
+}
+
+#characterSelection {
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background-image:
+        linear-gradient(rgba(7, 8, 13, 0.42), rgba(7, 8, 13, 0.78)),
+        url("assets/backgrounds/index.png");
+    background-size: cover;
+    background-position: center;
+}
+
+#selectionPanel {
+    width: min(760px, 94vw);
+    padding: 34px;
+    text-align: center;
+    color: white;
+    background: rgba(18, 18, 24, 0.94);
+    border: 3px solid #d5b56b;
+    border-radius: 16px;
+    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.65);
+}
+
+#selectionPanel h1 {
+    margin-bottom: 8px;
+    color: #e7c66f;
+    font-size: 42px;
+}
+
+#selectionPanel > p {
+    margin-bottom: 28px;
+    font-size: 20px;
+}
+
+#characterChoices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 22px;
+}
+
+.characterChoice {
+    min-height: 360px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    padding: 18px;
+    color: white;
+    background: rgba(45, 45, 55, 0.94);
+    border: 2px solid #666675;
+    border-radius: 12px;
+    cursor: pointer;
+    transition: transform 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+}
+
+.characterChoice:hover {
+    transform: translateY(-4px);
+    background: rgba(65, 65, 78, 0.98);
+    border-color: #ffd76a;
+}
+
+.characterChoice img {
+    width: 180px;
+    height: 250px;
+    object-fit: contain;
+    image-rendering: pixelated;
+}
+
+.characterChoice span {
+    font-size: 22px;
+    font-weight: bold;
+}
+
+@media (max-width: 650px) {
+    #characterChoices {
+        grid-template-columns: 1fr;
+    }
+
+    .characterChoice {
+        min-height: 260px;
+    }
+
+    .characterChoice img {
+        width: 130px;
+        height: 180px;
+    }
+}

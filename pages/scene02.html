@@ -3,78 +3,46 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
     <title>Eldoria - Maison jaune</title>
-
     <link rel="stylesheet" href="../assets/css/scene02.css">
+    <link rel="stylesheet" href="../assets/css/characters.css">
+    <link rel="stylesheet" href="../assets/css/inventory.css">
     <link rel="stylesheet" href="../assets/css/menu.css">
 </head>
-
 <body>
-
     <main id="game">
-
         <div id="player"></div>
-
         <div id="policier"></div>
 
         <div id="interactionPrompt">
             <span class="interactionKey">E</span>
-            <span>Parler</span>
+            <span id="interactionText">Parler</span>
         </div>
 
         <div id="dialogueOverlay">
-
             <div id="dialogueBox">
-
-                <div id="dialogueName">
-                    Policier
-                </div>
+                <div id="dialogueName">Policier</div>
 
                 <div id="dialogueText">
                     Veux tu rejoindre les forces de l'ordres pour nous aider a regler les manifestations ?
                 </div>
 
                 <div id="dialogueChoices">
-
-                    <button
-                        id="choiceStudent"
-                        class="dialogueChoice"
-                    >
+                    <button id="choiceStudent" class="dialogueChoice">
                         Non je suis lycéen moi
                     </button>
 
-                    <button
-                        id="choiceCRS"
-                        class="dialogueChoice"
-                    >
+                    <button id="choiceCRS" class="dialogueChoice">
                         Oui je veux être un CRS
                     </button>
-
                 </div>
-
             </div>
-
         </div>
-
-        <div id="inventoryBar">
-            <div class="inventorySlot selected" data-slot="0"></div>
-            <div class="inventorySlot" data-slot="1"></div>
-            <div class="inventorySlot" data-slot="2"></div>
-            <div class="inventorySlot" data-slot="3"></div>
-            <div class="inventorySlot" data-slot="4"></div>
-            <div class="inventorySlot" data-slot="5"></div>
-            <div class="inventorySlot" data-slot="6"></div>
-            <div class="inventorySlot" data-slot="7"></div>
-            <div class="inventorySlot" data-slot="8"></div>
-        </div>
-
     </main>
 
-    <script src="../assets/js/items.js"></script>
+    <script src="../assets/js/characters.js"></script>
+    <script src="../assets/js/inventory.js"></script>
     <script src="../assets/js/scene02.js"></script>
-
     <script src="../assets/js/menu.js"></script>
-
 </body>
 </html>

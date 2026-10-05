@@ -8,27 +8,52 @@ const policier =
     document.getElementById("policier");
 
 const interactionPrompt =
-    document.getElementById("interactionPrompt");
+    document.getElementById(
+        "interactionPrompt"
+    );
+
+const interactionText =
+    document.getElementById(
+        "interactionText"
+    );
 
 const dialogueOverlay =
-    document.getElementById("dialogueOverlay");
-
-const choiceStudent =
-    document.getElementById("choiceStudent");
-
-const choiceCRS =
-    document.getElementById("choiceCRS");
+    document.getElementById(
+        "dialogueOverlay"
+    );
 
 const dialogueText =
-    document.getElementById("dialogueText");
+    document.getElementById(
+        "dialogueText"
+    );
 
 const dialogueChoices =
-    document.getElementById("dialogueChoices");
-
-const inventorySlots =
-    document.querySelectorAll(
-        ".inventorySlot"
+    document.getElementById(
+        "dialogueChoices"
     );
+
+const choiceStudent =
+    document.getElementById(
+        "choiceStudent"
+    );
+
+const choiceCRS =
+    document.getElementById(
+        "choiceCRS"
+    );
+
+EldoriaCharacters.applySceneCharacters(
+    "scene02"
+);
+
+window.addEventListener(
+    "eldoriaCharacterChanged",
+    () => {
+        EldoriaCharacters.applySceneCharacters(
+            "scene02"
+        );
+    }
+);
 
 const SPEED = 1.0;
 const JUMP_HEIGHT = 22;
@@ -43,33 +68,19 @@ const keys = {};
 
 let playerX = 0;
 let playerY = 0;
-
 let jumping = false;
 let jumpProgress = 0;
 let jumpOffset = 0;
-
 let collisionReady = false;
 let policemanNearby = false;
 let exitNearby = false;
 let dialogueOpen = false;
 let policemanConversationDone =
     Boolean(
-        EldoriaProgress.getPolicemanChoice()
+        EldoriaCharacters.getRole()
     );
 
-let selectedInventorySlot = 0;
-
-const inventoryIcons = {
-    mortier: "../assets/items/mortier.png",
-    megaphone: "../assets/items/megaphone.png",
-    matraque: "../assets/items/matraque.png",
-    bouclier: "../assets/items/bouclier.png",
-    grenade_lbd: "../assets/items/grenade_lbd.png"
-};
-
-const collisionImage =
-    new Image();
-
+const collisionImage = new Image();
 const collisionCanvas =
     document.createElement("canvas");
 
@@ -82,7 +93,6 @@ const collisionContext =
     );
 
 function setSpawnPosition() {
-
     playerX =
         game.clientWidth *
         SPAWN_X_PERCENT;
@@ -96,11 +106,9 @@ function setSpawnPosition() {
 
     player.style.top =
         playerY + "px";
-
 }
 
 collisionImage.onload = () => {
-
     collisionCanvas.width =
         collisionImage.naturalWidth;
 
@@ -114,280 +122,21 @@ collisionImage.onload = () => {
     );
 
     collisionReady = true;
-
     setSpawnPosition();
-
 };
 
 collisionImage.onerror = () => {
-
     console.error(
         "Impossible de charger scene02_collision.png"
     );
 
     setSpawnPosition();
-
 };
 
 collisionImage.src =
     "../assets/js/collisions/scene02_collision.png";
 
-document.addEventListener(
-    "keydown",
-    (event) => {
-
-        const key =
-            event.key.toLowerCase();
-
-        keys[key] = true;
-
-        if (
-            key >= "1" &&
-            key <= "9"
-        ) {
-            selectInventorySlot(
-                Number(key) - 1
-            );
-        }
-
-        if (
-            event.code === "Space" &&
-            !jumping &&
-            !dialogueOpen
-        ) {
-
-            event.preventDefault();
-
-            jumping = true;
-            jumpProgress = 0;
-
-        }
-
-        if (
-            key === "e" &&
-            !event.repeat &&
-            !dialogueOpen
-        ) {
-
-            if (
-                policemanNearby &&
-                !policemanConversationDone
-            ) {
-
-                openDialogue();
-
-                return;
-
-            }
-
-            if (exitNearby) {
-
-                window.location.href =
-                    "scene01.html";
-
-                return;
-
-            }
-
-        }
-
-    }
-);
-
-document.addEventListener(
-    "keyup",
-    (event) => {
-
-        keys[
-            event.key.toLowerCase()
-        ] = false;
-
-    }
-);
-
-window.addEventListener(
-    "blur",
-    () => {
-
-        for (
-            const key in keys
-        ) {
-
-            keys[key] = false;
-
-        }
-
-    }
-);
-
-
-function getInventoryEntries() {
-    return Object.entries(
-        EldoriaItems.getAll()
-    );
-}
-
-function renderInventory() {
-    const items =
-        getInventoryEntries();
-
-    inventorySlots.forEach(
-        (
-            slot,
-            index
-        ) => {
-            slot.innerHTML = "";
-
-            slot.classList.toggle(
-                "selected",
-                index ===
-                selectedInventorySlot
-            );
-
-            const slotNumber =
-                document.createElement(
-                    "span"
-                );
-
-            slotNumber.className =
-                "inventorySlotNumber";
-
-            slotNumber.textContent =
-                index + 1;
-
-            slot.appendChild(
-                slotNumber
-            );
-
-            if (!items[index]) {
-                return;
-            }
-
-            const [
-                itemId,
-                quantity
-            ] = items[index];
-
-            const icon =
-                document.createElement(
-                    "img"
-                );
-
-            icon.className =
-                "inventoryItemIcon";
-
-            icon.src =
-                inventoryIcons[itemId] ||
-                "";
-
-            icon.alt =
-                itemId;
-
-            slot.appendChild(
-                icon
-            );
-
-            if (quantity > 1) {
-                const amount =
-                    document.createElement(
-                        "span"
-                    );
-
-                amount.className =
-                    "inventoryQuantity";
-
-                amount.textContent =
-                    quantity;
-
-                slot.appendChild(
-                    amount
-                );
-            }
-        }
-    );
-}
-
-function selectInventorySlot(index) {
-    if (
-        index < 0 ||
-        index >= inventorySlots.length
-    ) {
-        return;
-    }
-
-    selectedInventorySlot =
-        index;
-
-    renderInventory();
-}
-
-inventorySlots.forEach(
-    (
-        slot,
-        index
-    ) => {
-        slot.addEventListener(
-            "click",
-            (event) => {
-                event.stopPropagation();
-
-                selectInventorySlot(
-                    index
-                );
-            }
-        );
-    }
-);
-
-window.addEventListener(
-    "eldoriaInventoryChanged",
-    renderInventory
-);
-
-function repairSavedReward() {
-    const choice =
-        EldoriaProgress.getPolicemanChoice();
-
-    if (
-        choice === "lyceen_casseur"
-    ) {
-        EldoriaItems.addOnce(
-            "mortier",
-            1
-        );
-    }
-
-    if (
-        choice === "lyceen_pacifiste"
-    ) {
-        EldoriaItems.addOnce(
-            "megaphone",
-            1
-        );
-    }
-
-    if (
-        choice === "crs"
-    ) {
-        EldoriaItems.addOnce(
-            "matraque",
-            1
-        );
-
-        EldoriaItems.addOnce(
-            "bouclier",
-            1
-        );
-
-        EldoriaItems.addOnce(
-            "grenade_lbd",
-            1
-        );
-    }
-}
-
 function getBackgroundTransform() {
-
     const imageWidth =
         collisionCanvas.width;
 
@@ -412,69 +161,44 @@ function getBackgroundTransform() {
     const renderedHeight =
         imageHeight * scale;
 
-    const offsetX =
-        (
-            gameWidth -
-            renderedWidth
-        ) / 2;
-
-    const offsetY =
-        (
-            gameHeight -
-            renderedHeight
-        ) / 2;
-
     return {
         scale,
-        offsetX,
-        offsetY,
         renderedWidth,
-        renderedHeight
+        renderedHeight,
+        offsetX:
+            (gameWidth - renderedWidth) / 2,
+        offsetY:
+            (gameHeight - renderedHeight) / 2
     };
-
 }
 
 function screenToMap(
     screenX,
     screenY
 ) {
-
     const transform =
         getBackgroundTransform();
 
     return {
-
         x:
             Math.floor(
-                (
-                    screenX -
-                    transform.offsetX
-                ) /
+                (screenX - transform.offsetX) /
                 transform.scale
             ),
-
         y:
             Math.floor(
-                (
-                    screenY -
-                    transform.offsetY
-                ) /
+                (screenY - transform.offsetY) /
                 transform.scale
             )
-
     };
-
 }
 
 function isBlocked(
     mapX,
     mapY
 ) {
-
     if (!collisionReady) {
-
         return false;
-
     }
 
     if (
@@ -483,9 +207,7 @@ function isBlocked(
         mapX >= collisionCanvas.width ||
         mapY >= collisionCanvas.height
     ) {
-
         return true;
-
     }
 
     const pixel =
@@ -496,99 +218,49 @@ function isBlocked(
             1
         ).data;
 
-    const r =
-        pixel[0];
-
-    const g =
-        pixel[1];
-
-    const b =
-        pixel[2];
-
     return (
-        r < 100 &&
-        g < 100 &&
-        b < 100
+        pixel[0] < 100 &&
+        pixel[1] < 100 &&
+        pixel[2] < 100
     );
-
 }
 
 function canWalk(
     screenX,
     screenY
 ) {
-
     if (!collisionReady) {
-
         return true;
-
     }
 
     const feetY =
         screenY +
         player.offsetHeight * 0.43;
 
-    const halfWidth = 7;
-
     const points = [
-
-        {
-            x: screenX,
-            y: feetY
-        },
-
-        {
-            x:
-                screenX -
-                halfWidth,
-
-            y: feetY
-        },
-
-        {
-            x:
-                screenX +
-                halfWidth,
-
-            y: feetY
-        },
-
-        {
-            x: screenX,
-            y: feetY + 3
-        }
-
+        { x: screenX, y: feetY },
+        { x: screenX - 7, y: feetY },
+        { x: screenX + 7, y: feetY },
+        { x: screenX, y: feetY + 3 }
     ];
 
-    for (
-        const point of points
-    ) {
+    return points.every(
+        point => {
+            const mapPoint =
+                screenToMap(
+                    point.x,
+                    point.y
+                );
 
-        const mapPoint =
-            screenToMap(
-                point.x,
-                point.y
-            );
-
-        if (
-            isBlocked(
+            return !isBlocked(
                 mapPoint.x,
                 mapPoint.y
-            )
-        ) {
-
-            return false;
-
+            );
         }
-
-    }
-
-    return true;
-
+    );
 }
 
 function getPolicemanPosition() {
-
     const policemanRect =
         policier.getBoundingClientRect();
 
@@ -596,39 +268,33 @@ function getPolicemanPosition() {
         game.getBoundingClientRect();
 
     return {
-
         x:
             policemanRect.left -
             gameRect.left +
             policemanRect.width / 2,
-
         y:
             policemanRect.top -
             gameRect.top +
             policemanRect.height * 0.75
-
     };
-
 }
 
 function updateInteractions() {
+    policemanConversationDone =
+        Boolean(
+            EldoriaCharacters.getRole()
+        );
 
     if (dialogueOpen) {
-
         policemanNearby = false;
         exitNearby = false;
-
         interactionPrompt.classList.remove(
             "visible"
         );
-
         return;
-
     }
 
-    const playerFeetX =
-        playerX;
-
+    const playerFeetX = playerX;
     const playerFeetY =
         playerY +
         player.offsetHeight * 0.4;
@@ -636,26 +302,20 @@ function updateInteractions() {
     policemanNearby = false;
     exitNearby = false;
 
-    if (
-        !policemanConversationDone
-    ) {
-
+    if (!policemanConversationDone) {
         const policemanPosition =
             getPolicemanPosition();
 
         const distance =
             Math.hypot(
                 playerFeetX -
-                policemanPosition.x,
-
+                    policemanPosition.x,
                 playerFeetY -
-                policemanPosition.y
+                    policemanPosition.y
             );
 
         policemanNearby =
-            distance <=
-            TALK_DISTANCE;
-
+            distance <= TALK_DISTANCE;
     }
 
     const exitX =
@@ -667,66 +327,43 @@ function updateInteractions() {
         SPAWN_Y_PERCENT +
         player.offsetHeight * 0.4;
 
-    const exitDistance =
-        Math.hypot(
-            playerFeetX -
-            exitX,
-
-            playerFeetY -
-            exitY
-        );
-
     exitNearby =
-        exitDistance <=
-        EXIT_DISTANCE;
+        Math.hypot(
+            playerFeetX - exitX,
+            playerFeetY - exitY
+        ) <= EXIT_DISTANCE;
 
     if (policemanNearby) {
-
-        interactionPrompt.innerHTML =
-            `
-            <span class="interactionKey">E</span>
-            <span>Parler</span>
-            `;
+        interactionText.textContent =
+            "Parler";
 
         interactionPrompt.classList.add(
             "visible"
         );
-
         return;
-
     }
 
     if (exitNearby) {
-
-        interactionPrompt.innerHTML =
-            `
-            <span class="interactionKey">E</span>
-            <span>Sortir</span>
-            `;
+        interactionText.textContent =
+            "Sortir";
 
         interactionPrompt.classList.add(
             "visible"
         );
-
         return;
-
     }
 
     interactionPrompt.classList.remove(
         "visible"
     );
-
 }
 
 function openDialogue() {
-
     if (
         policemanConversationDone ||
         dialogueOpen
     ) {
-
         return;
-
     }
 
     dialogueOpen = true;
@@ -743,7 +380,6 @@ function openDialogue() {
         document.pointerLockElement ===
         game
     ) {
-
         if (
             window.EldoriaPauseMenu
         ) {
@@ -751,13 +387,10 @@ function openDialogue() {
         } else {
             document.exitPointerLock();
         }
-
     }
-
 }
 
 function finishConversation() {
-
     policemanConversationDone = true;
     dialogueOpen = false;
     policemanNearby = false;
@@ -769,88 +402,73 @@ function finishConversation() {
     interactionPrompt.classList.remove(
         "visible"
     );
-
 }
 
 function validateFinalChoice(choice) {
-
     const existingChoice =
-        EldoriaProgress.getPolicemanChoice();
+        EldoriaCharacters.getRole();
 
     if (
         existingChoice &&
         existingChoice !== choice
     ) {
-
         finishConversation();
         return;
-
     }
 
     if (!existingChoice) {
-
-        EldoriaProgress.setPolicemanChoice(
+        EldoriaCharacters.setRole(
             choice
         );
-
     }
 
     if (
         choice === "lyceen_casseur"
     ) {
-
-        EldoriaItems.addOnce(
+        EldoriaInventory.addOnce(
             "mortier",
             1
         );
-
     }
 
     if (
         choice === "lyceen_pacifiste"
     ) {
-
-        EldoriaItems.addOnce(
+        EldoriaInventory.addOnce(
             "megaphone",
             1
         );
-
     }
 
-    if (
-        choice === "crs"
-    ) {
-
-        EldoriaItems.addOnce(
+    if (choice === "crs") {
+        EldoriaInventory.addOnce(
             "matraque",
             1
         );
 
-        EldoriaItems.addOnce(
+        EldoriaInventory.addOnce(
             "bouclier",
             1
         );
 
-        EldoriaItems.addOnce(
+        EldoriaInventory.addOnce(
             "grenade_lbd",
             1
         );
-
     }
 
-    renderInventory();
+    EldoriaCharacters.applySceneCharacters(
+        "scene02"
+    );
 
     finishConversation();
-
 }
 
 function showStudentChoice() {
-
     dialogueText.textContent =
         "Tu veux être un casseur ou un pacifiste ?";
 
-    dialogueChoices.innerHTML =
-        "";
+    dialogueChoices.innerHTML = "";
 
     const choiceBreaker =
         document.createElement(
@@ -877,22 +495,18 @@ function showStudentChoice() {
     choiceBreaker.addEventListener(
         "click",
         () => {
-
             validateFinalChoice(
                 "lyceen_casseur"
             );
-
         }
     );
 
     choicePacifist.addEventListener(
         "click",
         () => {
-
             validateFinalChoice(
                 "lyceen_pacifiste"
             );
-
         }
     );
 
@@ -900,35 +514,23 @@ function showStudentChoice() {
         choiceBreaker,
         choicePacifist
     );
-
 }
 
 choiceStudent.addEventListener(
     "click",
-    () => {
-
-        showStudentChoice();
-
-    }
+    showStudentChoice
 );
 
 choiceCRS.addEventListener(
     "click",
     () => {
-
-        validateFinalChoice(
-            "crs"
-        );
-
+        validateFinalChoice("crs");
     }
 );
 
 function keepInsideMap() {
-
     if (!collisionReady) {
-
         return;
-
     }
 
     const transform =
@@ -940,107 +542,134 @@ function keepInsideMap() {
     const halfHeight =
         player.offsetHeight / 2;
 
-    const minX =
-        transform.offsetX +
-        halfWidth;
+    playerX = Math.max(
+        transform.offsetX + halfWidth,
+        Math.min(
+            transform.offsetX +
+                transform.renderedWidth -
+                halfWidth,
+            playerX
+        )
+    );
 
-    const maxX =
-        transform.offsetX +
-        transform.renderedWidth -
-        halfWidth;
-
-    const minY =
-        transform.offsetY +
-        halfHeight;
-
-    const maxY =
-        transform.offsetY +
-        transform.renderedHeight -
-        halfHeight;
-
-    playerX =
-        Math.max(
-            minX,
-            Math.min(
-                maxX,
-                playerX
-            )
-        );
-
-    playerY =
-        Math.max(
-            minY,
-            Math.min(
-                maxY,
-                playerY
-            )
-        );
-
+    playerY = Math.max(
+        transform.offsetY + halfHeight,
+        Math.min(
+            transform.offsetY +
+                transform.renderedHeight -
+                halfHeight,
+            playerY
+        )
+    );
 }
 
 function updateJump() {
-
     if (!jumping) {
-
         jumpOffset = 0;
-
         return;
-
     }
 
-    jumpProgress +=
-        JUMP_SPEED;
+    jumpProgress += JUMP_SPEED;
 
     jumpOffset =
-        Math.sin(
-            jumpProgress
-        ) *
+        Math.sin(jumpProgress) *
         JUMP_HEIGHT;
 
     if (
-        jumpProgress >=
-        Math.PI
+        jumpProgress >= Math.PI
     ) {
-
         jumping = false;
         jumpProgress = 0;
         jumpOffset = 0;
-
     }
-
 }
 
-function update() {
+function isGamePaused() {
+    return Boolean(
+        window.EldoriaPauseMenu &&
+        EldoriaPauseMenu.isOpen()
+    );
+}
 
+document.addEventListener(
+    "keydown",
+    event => {
+        const key =
+            event.key.toLowerCase();
+
+        keys[key] = true;
+
+        if (
+            event.code === "Space" &&
+            !jumping &&
+            !dialogueOpen &&
+            !isGamePaused()
+        ) {
+            event.preventDefault();
+            jumping = true;
+            jumpProgress = 0;
+        }
+
+        if (
+            key === "e" &&
+            !event.repeat &&
+            !dialogueOpen &&
+            !isGamePaused()
+        ) {
+            if (policemanNearby) {
+                openDialogue();
+                return;
+            }
+
+            if (exitNearby) {
+                window.location.href =
+                    "scene01.html";
+            }
+        }
+    }
+);
+
+document.addEventListener(
+    "keyup",
+    event => {
+        keys[
+            event.key.toLowerCase()
+        ] = false;
+    }
+);
+
+window.addEventListener(
+    "blur",
+    () => {
+        for (
+            const key in keys
+        ) {
+            keys[key] = false;
+        }
+    }
+);
+
+function update() {
     let dx = 0;
     let dy = 0;
 
-    const pauseMenuOpen =
-        window.EldoriaPauseMenu &&
-        EldoriaPauseMenu.isOpen();
-
     if (
         !dialogueOpen &&
-        !pauseMenuOpen
+        !isGamePaused()
     ) {
-
         if (
             keys["z"] ||
             keys["w"] ||
             keys["arrowup"]
         ) {
-
             dy -= 1;
-
         }
 
         if (
             keys["s"] ||
             keys["arrowdown"]
         ) {
-
             dy += 1;
-
         }
 
         if (
@@ -1048,47 +677,32 @@ function update() {
             keys["a"] ||
             keys["arrowleft"]
         ) {
-
             dx -= 1;
-
         }
 
         if (
             keys["d"] ||
             keys["arrowright"]
         ) {
-
             dx += 1;
-
         }
-
     }
 
     if (
         dx !== 0 ||
         dy !== 0
     ) {
-
         const length =
-            Math.hypot(
-                dx,
-                dy
-            );
+            Math.hypot(dx, dy);
 
         dx =
-            dx /
-            length *
-            SPEED;
+            dx / length * SPEED;
 
         dy =
-            dy /
-            length *
-            SPEED;
-
+            dy / length * SPEED;
     }
 
     if (dx !== 0) {
-
         const nextX =
             playerX + dx;
 
@@ -1098,16 +712,11 @@ function update() {
                 playerY
             )
         ) {
-
-            playerX =
-                nextX;
-
+            playerX = nextX;
         }
-
     }
 
     if (dy !== 0) {
-
         const nextY =
             playerY + dy;
 
@@ -1117,131 +726,73 @@ function update() {
                 nextY
             )
         ) {
-
-            playerY =
-                nextY;
-
+            playerY = nextY;
         }
-
     }
 
     keepInsideMap();
-
     updateJump();
-
     updateInteractions();
 
     player.style.left =
         playerX + "px";
 
     player.style.top =
-        (
-            playerY -
-            jumpOffset
-        ) + "px";
+        (playerY - jumpOffset) +
+        "px";
 
-    requestAnimationFrame(
-        update
-    );
-
+    requestAnimationFrame(update);
 }
 
 game.addEventListener(
     "click",
-    (event) => {
-
-        if (dialogueOpen) {
-
-            return;
-
-        }
-
+    event => {
         if (
+            dialogueOpen ||
+            isGamePaused() ||
             event.target.closest(
                 "#dialogueOverlay"
-            )
-        ) {
-
-            return;
-
-        }
-
-        if (
+            ) ||
             event.target.closest(
                 "#inventoryBar"
             )
         ) {
-
             return;
-
         }
 
         if (
             document.pointerLockElement !==
             game
         ) {
-
             game.requestPointerLock();
-
         }
-
     }
 );
 
 document.addEventListener(
     "pointerlockchange",
     () => {
-
-        if (
+        game.classList.toggle(
+            "mouse-locked",
             document.pointerLockElement ===
-            game
-        ) {
-
-            game.classList.add(
-                "mouse-locked"
-            );
-
-        }
-
-        else {
-
-            game.classList.remove(
-                "mouse-locked"
-            );
-
-        }
-
+                game
+        );
     }
 );
 
 window.addEventListener(
     "resize",
-    () => {
-
-        setSpawnPosition();
-
-    }
+    setSpawnPosition
 );
 
 window.addEventListener(
     "load",
     () => {
-
         requestAnimationFrame(
-            () => {
-
-                setSpawnPosition();
-
-            }
+            setSpawnPosition
         );
-
     }
 );
 
 setSpawnPosition();
-
-repairSavedReward();
-
-renderInventory();
-
 update();
