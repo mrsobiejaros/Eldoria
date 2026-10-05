@@ -123,6 +123,14 @@ pauseMenuClear.addEventListener(
             "eldoria_character_v1"
         );
 
+        localStorage.removeItem(
+            "eldoria_scene03_quest_v1"
+        );
+
+        localStorage.removeItem(
+            "eldoria_missions_v1"
+        );
+
         window.location.href =
             "../index.html";
     }

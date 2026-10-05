@@ -31,7 +31,11 @@ const SPEED = 1.0;
 const JUMP_HEIGHT = 22;
 const JUMP_SPEED = 0.11;
 const DOOR_INTERACTION_DISTANCE = 55;
+const FINAL_PORTAL_DISTANCE = 72;
 const COLOR_TOLERANCE = 55;
+
+const FINAL_PORTAL_X_PERCENT = 0.50;
+const FINAL_PORTAL_Y_PERCENT = 0.55;
 
 const keys = {};
 
@@ -45,7 +49,16 @@ let jumping = false;
 let jumpProgress = 0;
 let jumpOffset = 0;
 let nearbyDoor = null;
+let nearFinalPortal = false;
 let collisionReady = false;
+
+function isFinalSceneUnlocked() {
+    return Boolean(
+        window.EldoriaMissions &&
+        EldoriaMissions.allComplete() &&
+        EldoriaMissions.isEndingSeen()
+    );
+}
 
 const doorTypes = [
     { name: "yellow", r: 255, g: 255, b: 0, scene: "scene02.html" },
@@ -344,10 +357,48 @@ function canWalk(
 
 function updateDoorInteraction() {
     nearbyDoor = null;
+    nearFinalPortal = false;
 
     interactionPrompt.classList.remove(
         "visible"
     );
+
+    if (
+        isFinalSceneUnlocked()
+    ) {
+        const finalPortalX =
+            game.clientWidth *
+            FINAL_PORTAL_X_PERCENT;
+
+        const finalPortalY =
+            game.clientHeight *
+            FINAL_PORTAL_Y_PERCENT;
+
+        const finalPortalDistance =
+            Math.hypot(
+                playerX -
+                finalPortalX,
+                playerY -
+                finalPortalY
+            );
+
+        if (
+            finalPortalDistance <=
+            FINAL_PORTAL_DISTANCE
+        ) {
+            nearFinalPortal =
+                true;
+
+            interactionText.textContent =
+                "Entrer dans la scène finale";
+
+            interactionPrompt.classList.add(
+                "visible"
+            );
+
+            return;
+        }
+    }
 
     if (!collisionReady) {
         return;
@@ -360,24 +411,31 @@ function updateDoorInteraction() {
                 player.offsetHeight * 0.43
         );
 
-    let closestDistance = Infinity;
+    let closestDistance =
+        Infinity;
 
     for (
         const door of detectedDoors
     ) {
         const distance =
             Math.hypot(
-                door.x - playerMap.x,
-                door.y - playerMap.y
+                door.x -
+                playerMap.x,
+                door.y -
+                playerMap.y
             );
 
         if (
             distance <=
                 DOOR_INTERACTION_DISTANCE &&
-            distance < closestDistance
+            distance <
+                closestDistance
         ) {
-            closestDistance = distance;
-            nearbyDoor = door;
+            closestDistance =
+                distance;
+
+            nearbyDoor =
+                door;
         }
     }
 
@@ -475,11 +533,22 @@ document.addEventListener(
         if (
             key === "e" &&
             !event.repeat &&
-            nearbyDoor &&
             !isGamePaused()
         ) {
-            window.location.href =
-                nearbyDoor.type.scene;
+            if (
+                nearFinalPortal &&
+                isFinalSceneUnlocked()
+            ) {
+                window.location.href =
+                    "scene10.html";
+
+                return;
+            }
+
+            if (nearbyDoor) {
+                window.location.href =
+                    nearbyDoor.type.scene;
+            }
         }
     }
 );

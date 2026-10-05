@@ -22,6 +22,11 @@ const dialogueOverlay =
         "dialogueOverlay"
     );
 
+const dialogueName =
+    document.getElementById(
+        "dialogueName"
+    );
+
 const dialogueText =
     document.getElementById(
         "dialogueText"
@@ -46,12 +51,21 @@ EldoriaCharacters.applySceneCharacters(
     "scene02"
 );
 
+setTimeout(
+    () => {
+        applyFinalEndingNpc();
+    },
+    0
+);
+
 window.addEventListener(
     "eldoriaCharacterChanged",
     () => {
         EldoriaCharacters.applySceneCharacters(
             "scene02"
         );
+
+        applyFinalEndingNpc();
     }
 );
 
@@ -75,10 +89,18 @@ let collisionReady = false;
 let policemanNearby = false;
 let exitNearby = false;
 let dialogueOpen = false;
+let finalEndingAvailable =
+    Boolean(
+        window.EldoriaMissions &&
+        EldoriaMissions.allComplete() &&
+        !EldoriaMissions.isEndingSeen()
+    );
+
 let policemanConversationDone =
     Boolean(
         EldoriaCharacters.getRole()
-    );
+    ) &&
+    !finalEndingAvailable;
 
 const collisionImage = new Image();
 const collisionCanvas =
@@ -279,11 +301,156 @@ function getPolicemanPosition() {
     };
 }
 
+function getFinalEndingData() {
+    const currentRole =
+        EldoriaCharacters.getRole();
+
+    if (
+        currentRole ===
+        "lyceen_casseur"
+    ) {
+        return {
+            name:
+                "Casseur",
+
+            text:
+                "Bravo mon gars la revolution a marché on a renverser le gouvernement on a gagner",
+
+            sprite:
+                "../assets/characters/player_men_cagoule.png"
+        };
+    }
+
+    if (
+        currentRole === "crs"
+    ) {
+        return {
+            name:
+                "Policier",
+
+            text:
+                "Bravo tu les as bien eu ces gosses bravo la revolte est maté",
+
+            sprite:
+                "../assets/characters/policier.png"
+        };
+    }
+
+    return {
+        name:
+            "Jeune pacifiste",
+
+        text:
+            "Bravo tu as reussi a obtenir des droits en france attention plus tard ca va peut etre changer on ne sais jamais le gouvernement est etrange.",
+
+        sprite:
+            "../assets/characters/player_men.png"
+    };
+}
+
+function applyFinalEndingNpc() {
+    if (!finalEndingAvailable) {
+        return;
+    }
+
+    const ending =
+        getFinalEndingData();
+
+    EldoriaCharacters.applySprite(
+        policier,
+        ending.sprite
+    );
+}
+
+function openFinalEndingDialogue() {
+    const ending =
+        getFinalEndingData();
+
+    dialogueOpen = true;
+
+    dialogueName.textContent =
+        ending.name;
+
+    dialogueText.textContent =
+        ending.text;
+
+    dialogueChoices.innerHTML =
+        "";
+
+    const continueButton =
+        document.createElement(
+            "button"
+        );
+
+    continueButton.className =
+        "dialogueChoice";
+
+    continueButton.textContent =
+        "Continuer";
+
+    continueButton.addEventListener(
+        "click",
+        () => {
+            EldoriaMissions.markEndingSeen();
+
+            finalEndingAvailable =
+                false;
+
+            policemanConversationDone =
+                true;
+
+            dialogueOpen =
+                false;
+
+            dialogueOverlay.classList.remove(
+                "visible"
+            );
+
+            interactionPrompt.classList.remove(
+                "visible"
+            );
+        }
+    );
+
+    dialogueChoices.appendChild(
+        continueButton
+    );
+
+    interactionPrompt.classList.remove(
+        "visible"
+    );
+
+    dialogueOverlay.classList.add(
+        "visible"
+    );
+
+    if (
+        document.pointerLockElement ===
+        game
+    ) {
+        if (
+            window.EldoriaPauseMenu
+        ) {
+            EldoriaPauseMenu.unlockPointerWithoutPause();
+        } else {
+            document.exitPointerLock();
+        }
+    }
+}
+
 function updateInteractions() {
+    finalEndingAvailable =
+        Boolean(
+            window.EldoriaMissions &&
+            EldoriaMissions.allComplete() &&
+            !EldoriaMissions.isEndingSeen()
+        );
+
     policemanConversationDone =
         Boolean(
             EldoriaCharacters.getRole()
-        );
+        ) &&
+        !finalEndingAvailable;
 
     if (dialogueOpen) {
         policemanNearby = false;
@@ -359,6 +526,14 @@ function updateInteractions() {
 }
 
 function openDialogue() {
+    if (
+        finalEndingAvailable &&
+        !dialogueOpen
+    ) {
+        openFinalEndingDialogue();
+        return;
+    }
+
     if (
         policemanConversationDone ||
         dialogueOpen

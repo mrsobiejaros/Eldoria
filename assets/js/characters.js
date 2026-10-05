@@ -47,6 +47,66 @@ const ELDORIA_CHARACTER_SIZES = {
             height: 98
         }
     },
+    scene04: {
+        player: {
+            width: 82,
+            height: 112
+        },
+        npc: {
+            width: 72,
+            height: 98
+        }
+    },
+    scene05: {
+        player: {
+            width: 82,
+            height: 112
+        },
+        npc: {
+            width: 72,
+            height: 98
+        }
+    },
+    scene06: {
+        player: {
+            width: 82,
+            height: 112
+        },
+        npc: {
+            width: 72,
+            height: 98
+        }
+    },
+    scene07: {
+        player: {
+            width: 82,
+            height: 112
+        },
+        npc: {
+            width: 72,
+            height: 98
+        }
+    },
+    scene08: {
+        player: {
+            width: 82,
+            height: 112
+        },
+        npc: {
+            width: 72,
+            height: 98
+        }
+    },
+    scene09: {
+        player: {
+            width: 86,
+            height: 118
+        },
+        npc: {
+            width: 76,
+            height: 104
+        }
+    },
     default: {
         player: {
             width: 64,
