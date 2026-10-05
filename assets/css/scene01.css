@@ -1,0 +1,53 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html,
+body {
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+}
+
+body {
+    background: black;
+}
+
+/* Zone principale du jeu */
+#game {
+    position: relative;
+
+    width: 100vw;
+    height: 100vh;
+
+    overflow: hidden;
+
+    background-image: url("../backgrounds/scene01.png");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+}
+
+/* Personnage */
+#player {
+    position: absolute;
+
+    width: 48px;
+    height: 64px;
+
+    left: 50%;
+    top: 50%;
+
+    background-image: url("../characters/player.png");
+    background-size: contain;
+    background-position: center;
+    background-repeat: no-repeat;
+
+    image-rendering: pixelated;
+
+    transform: translate(-50%, -50%);
+
+    z-index: 10;
+}
