@@ -34,5 +34,58 @@ window.ELDORIA_SCENE_CONFIG = {
             type: "sit_down",
             cooldown: 14000
         }
-    }
+    },
+    choices: {
+        "lyceen_casseur": [
+                [
+                        "esquive",
+                        "Esquive",
+                        "La fenêtre d'esquive pendant le saut est plus large."
+                ],
+                [
+                        "rush",
+                        "Rush",
+                        "Vitesse augmentée de 35 %."
+                ],
+                [
+                        "agressif",
+                        "Agressif",
+                        "Cadence d'action fortement réduite."
+                ]
+        ],
+        "crs": [
+                [
+                        "formation",
+                        "Formation serrée",
+                        "Dégâts reçus réduits de 30 %."
+                ],
+                [
+                        "tir_reactif",
+                        "Tir réactif",
+                        "Cooldown d'action réduit."
+                ],
+                [
+                        "poursuite",
+                        "Poursuite",
+                        "Tu te déplaces 30 % plus vite."
+                ]
+        ],
+        "lyceen_pacifiste": [
+                [
+                        "panique_zero",
+                        "Zéro panique",
+                        "Tu subis 30 % de dégâts en moins."
+                ],
+                [
+                        "chant",
+                        "Chant continu",
+                        "Le mégaphone a 30 % de chance de compter double."
+                ],
+                [
+                        "fuite",
+                        "Fuite organisée",
+                        "Vitesse augmentée et meilleure esquive."
+                ]
+        ]
+}
 };

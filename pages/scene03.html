@@ -12,8 +12,11 @@
     <link rel="stylesheet" href="../assets/css/protest.css">
 </head>
 
-<body>
-
+<body
+    data-music="../assets/sounds/combat.mp3"
+    data-music-loop="false"
+    data-music-volume="0.35"
+>
     <main id="game">
         <div id="sceneWorld"></div>
         <div id="hazardLayer"></div>
@@ -64,6 +67,15 @@
 
         <div id="gameMessage"></div>
 
+        <div id="choiceOverlay">
+            <div id="choicePanel">
+                <div id="choiceScene"></div>
+                <h2>Choisis ta tactique</h2>
+                <p id="choiceIntro"></p>
+                <div id="choiceButtons"></div>
+            </div>
+        </div>
+
         <div id="questCompleteOverlay">
             <div id="questCompleteBox">
                 Quête validée !
@@ -81,5 +93,7 @@
     <script src="../assets/js/scene03.js"></script>
     <script src="../assets/js/protestEngine.js"></script>
     <script src="../assets/js/menu.js"></script>
+
+    <script src="../assets/js/music.js"></script>
 </body>
 </html>

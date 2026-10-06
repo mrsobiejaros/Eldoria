@@ -580,3 +580,129 @@ body {
             transparent
         );
 }
+
+
+#choiceOverlay {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background:
+        radial-gradient(
+            circle at 50% 45%,
+            rgba(18, 20, 30, 0.72),
+            rgba(4, 5, 9, 0.94)
+        );
+    z-index: 700;
+}
+
+#choiceOverlay.hidden {
+    display: none;
+}
+
+#choicePanel {
+    width: min(620px, 92vw);
+    padding: 28px;
+    color: white;
+    background: rgba(12, 14, 22, 0.97);
+    border: 2px solid var(--scene-accent);
+    border-radius: 14px;
+    box-shadow:
+        0 24px 80px
+        rgba(0, 0, 0, 0.62);
+}
+
+#choiceScene {
+    margin-bottom: 7px;
+    color: var(--scene-accent);
+    font-size: 12px;
+    font-weight: bold;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+}
+
+#choicePanel h2 {
+    font-size: 28px;
+}
+
+#choiceIntro {
+    margin-top: 8px;
+    color: rgba(255, 255, 255, 0.72);
+    font-size: 14px;
+    line-height: 1.45;
+}
+
+#choiceButtons {
+    display: grid;
+    grid-template-columns:
+        repeat(
+            2,
+            minmax(0, 1fr)
+        );
+    gap: 12px;
+    margin-top: 22px;
+}
+
+.tacticChoice {
+    min-height: 130px;
+    padding: 16px;
+    color: white;
+    text-align: left;
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.055
+        );
+    border:
+        1px solid
+        rgba(
+            255,
+            255,
+            255,
+            0.16
+        );
+    border-radius: 9px;
+    cursor: pointer;
+    transition:
+        transform 0.15s ease,
+        border-color 0.15s ease,
+        background 0.15s ease;
+}
+
+.tacticChoice:hover {
+    transform:
+        translateY(-3px);
+    border-color:
+        var(--scene-accent);
+    background:
+        rgba(
+            255,
+            255,
+            255,
+            0.10
+        );
+}
+
+.tacticChoice strong {
+    display: block;
+    color: var(--scene-accent);
+    font-size: 17px;
+}
+
+.tacticChoice span {
+    display: block;
+    margin-top: 8px;
+    color: rgba(255, 255, 255, 0.78);
+    font-size: 13px;
+    line-height: 1.45;
+}
+
+@media (max-width: 650px) {
+    #choiceButtons {
+        grid-template-columns: 1fr;
+    }
+}

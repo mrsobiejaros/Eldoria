@@ -33,5 +33,58 @@ window.ELDORIA_SCENE_CONFIG = {
             type: "collective_chant",
             cooldown: 11000
         }
-    }
+    },
+    choices: {
+        "lyceen_casseur": [
+                [
+                        "mortier_lourd",
+                        "Mortier lourd",
+                        "Mortiers très puissants et cadence légèrement améliorée."
+                ],
+                [
+                        "mobilite",
+                        "Mobilité",
+                        "Tu te déplaces 30 % plus vite."
+                ],
+                [
+                        "rage",
+                        "Rage",
+                        "Tu subis 20 % de dégâts en moins et ta cadence augmente."
+                ]
+        ],
+        "crs": [
+                [
+                        "lbd_puissant",
+                        "LBD renforcé",
+                        "Tes tirs de LBD infligent davantage de dégâts."
+                ],
+                [
+                        "protection",
+                        "Protection",
+                        "Tu subis 25 % de dégâts en moins."
+                ],
+                [
+                        "discipline",
+                        "Discipline",
+                        "Cadence améliorée et vitesse légèrement augmentée."
+                ]
+        ],
+        "lyceen_pacifiste": [
+                [
+                        "voix_forte",
+                        "Voix forte",
+                        "Chaque mégaphone a 25 % de chance de compter double."
+                ],
+                [
+                        "souffle",
+                        "Souffle",
+                        "Tu te déplaces plus vite et récupères 10 PV."
+                ],
+                [
+                        "calme_collectif",
+                        "Calme collectif",
+                        "Ton mégaphone ralentit les bots et tu subis moins de dégâts."
+                ]
+        ]
+}
 };

@@ -34,5 +34,58 @@ window.ELDORIA_SCENE_CONFIG = {
             type: "safe_shelter",
             cooldown: 14000
         }
-    }
+    },
+    choices: {
+        "lyceen_casseur": [
+                [
+                        "couverture",
+                        "Planqué",
+                        "Tu subis 35 % de dégâts en moins."
+                ],
+                [
+                        "tir_rapide",
+                        "Tir rapide",
+                        "Cooldown d'action réduit."
+                ],
+                [
+                        "flanc",
+                        "Contournement",
+                        "Tu te déplaces plus vite pour contourner les barricades."
+                ]
+        ],
+        "crs": [
+                [
+                        "bouclier_epais",
+                        "Bouclier épais",
+                        "Les dégâts reçus sont fortement réduits."
+                ],
+                [
+                        "avancee",
+                        "Avancée",
+                        "Tu te déplaces 25 % plus vite."
+                ],
+                [
+                        "pression_tir",
+                        "Pression de tir",
+                        "Tes LBD font plus mal et ta cadence augmente légèrement."
+                ]
+        ],
+        "lyceen_pacifiste": [
+                [
+                        "abri",
+                        "Abri",
+                        "Tu récupères lentement de la vie."
+                ],
+                [
+                        "encouragement",
+                        "Encouragement",
+                        "Ton mégaphone a 25 % de chance de compter double."
+                ],
+                [
+                        "discret",
+                        "Discret",
+                        "Tu subis beaucoup moins de dégâts derrière les barricades."
+                ]
+        ]
+}
 };

@@ -131,6 +131,10 @@ pauseMenuClear.addEventListener(
             "eldoria_missions_v1"
         );
 
+        localStorage.removeItem(
+            "eldoria_scene_choices_v1"
+        );
+
         window.location.href =
             "../index.html";
     }

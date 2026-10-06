@@ -35,5 +35,58 @@ window.ELDORIA_SCENE_CONFIG = {
             type: "final_speech",
             cooldown: 17000
         }
-    }
+    },
+    choices: {
+        "lyceen_casseur": [
+                [
+                        "assaut_final",
+                        "Assaut final",
+                        "Vitesse et cadence d'action augmentées."
+                ],
+                [
+                        "dernier_mortier",
+                        "Dernier mortier",
+                        "Tu subis 20 % de dégâts en moins."
+                ],
+                [
+                        "tout_ou_rien",
+                        "Tout ou rien",
+                        "Très grosse cadence mais résistance plus faible."
+                ]
+        ],
+        "crs": [
+                [
+                        "ligne_finale",
+                        "Dernière ligne",
+                        "Dégâts reçus réduits et LBD renforcés."
+                ],
+                [
+                        "pression",
+                        "Pression",
+                        "Vitesse et cadence d'action augmentées."
+                ],
+                [
+                        "commandement",
+                        "Commandement",
+                        "Résistance et vitesse légèrement augmentées."
+                ]
+        ],
+        "lyceen_pacifiste": [
+                [
+                        "discours",
+                        "Discours final",
+                        "Le mégaphone a 45 % de chance de compter double."
+                ],
+                [
+                        "resilience",
+                        "Résilience",
+                        "Tu subis 40 % de dégâts en moins et récupères lentement de la vie."
+                ],
+                [
+                        "espoir",
+                        "Dernier espoir",
+                        "Vitesse améliorée, meilleure esquive et mégaphone parfois double."
+                ]
+        ]
+}
 };

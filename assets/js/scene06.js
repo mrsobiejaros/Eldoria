@@ -34,5 +34,58 @@ window.ELDORIA_SCENE_CONFIG = {
             type: "safe_path",
             cooldown: 14000
         }
-    }
+    },
+    choices: {
+        "lyceen_casseur": [
+                [
+                        "ignifuge",
+                        "Veste ignifugée",
+                        "Les zones de feu te font beaucoup moins mal."
+                ],
+                [
+                        "sprint_feu",
+                        "Sprint brûlant",
+                        "Tu cours plus vite dans cette scène."
+                ],
+                [
+                        "furie_feu",
+                        "Furie des flammes",
+                        "Cadence améliorée et dégâts reçus réduits."
+                ]
+        ],
+        "crs": [
+                [
+                        "armure_thermique",
+                        "Armure thermique",
+                        "Dégâts de feu fortement réduits."
+                ],
+                [
+                        "lbd_stable",
+                        "LBD stable",
+                        "Tes LBD sont plus puissants."
+                ],
+                [
+                        "intervention_feu",
+                        "Intervention rapide",
+                        "Vitesse augmentée et résistance légère."
+                ]
+        ],
+        "lyceen_pacifiste": [
+                [
+                        "chemin_sur",
+                        "Chemin sûr",
+                        "Tu subis beaucoup moins de dégâts de feu."
+                ],
+                [
+                        "appel_calme",
+                        "Appel au calme",
+                        "Le mégaphone ralentit les bots."
+                ],
+                [
+                        "secouriste",
+                        "Secouriste",
+                        "Tu récupères lentement de la vie et résistes mieux au feu."
+                ]
+        ]
+}
 };

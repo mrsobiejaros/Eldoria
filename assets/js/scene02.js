@@ -76,7 +76,7 @@ const TALK_DISTANCE = 85;
 const EXIT_DISTANCE = 75;
 
 const SPAWN_X_PERCENT = 0.50;
-const SPAWN_Y_PERCENT = 0.72;
+const SPAWN_Y_PERCENT = 0.35;
 
 const keys = {};
 

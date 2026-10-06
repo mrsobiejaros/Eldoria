@@ -70,6 +70,26 @@ const specialDescription =
 const gameMessage =
     document.getElementById("gameMessage");
 
+const choiceOverlay =
+    document.getElementById(
+        "choiceOverlay"
+    );
+
+const choiceScene =
+    document.getElementById(
+        "choiceScene"
+    );
+
+const choiceIntro =
+    document.getElementById(
+        "choiceIntro"
+    );
+
+const choiceButtons =
+    document.getElementById(
+        "choiceButtons"
+    );
+
 const questCompleteOverlay =
     document.getElementById(
         "questCompleteOverlay"
@@ -205,6 +225,24 @@ const JUMP_HEIGHT = 30;
 
 let brickCount = 0;
 let shieldRaised = false;
+
+const CHOICE_STORAGE_KEY =
+    "eldoria_scene_choices_v1";
+
+let selectedChoice =
+    null;
+
+let choiceSpeedMultiplier = 1;
+let choiceDamageTakenMultiplier = 1;
+let choiceActionCooldownMultiplier = 1;
+let choiceLbdDamageMultiplier = 1;
+let choiceBrickDamageMultiplier = 1;
+let choiceFireDamageMultiplier = 1;
+let choiceJumpWindowBonus = 0;
+let choiceMegaphoneDoubleChance = 0;
+let choiceZoneDoubleChance = 0;
+let choicePassiveRegen = false;
+let lastPassiveRegen = 0;
 
 let specialReadyAt = 0;
 let speedBoostUntil = 0;
@@ -649,6 +687,514 @@ function useSpecialAbility() {
     updateSpecialUi();
 }
 
+function readChoiceData() {
+    try {
+        const value =
+            JSON.parse(
+                localStorage.getItem(
+                    CHOICE_STORAGE_KEY
+                ) || "{}"
+            );
+
+        if (
+            typeof value !== "object" ||
+            value === null ||
+            Array.isArray(value)
+        ) {
+            return {};
+        }
+
+        return value;
+    } catch {
+        return {};
+    }
+}
+
+function saveSelectedChoice(
+    choiceId
+) {
+    const data =
+        readChoiceData();
+
+    if (!data[config.id]) {
+        data[config.id] = {};
+    }
+
+    data[config.id][role] =
+        choiceId;
+
+    localStorage.setItem(
+        CHOICE_STORAGE_KEY,
+        JSON.stringify(data)
+    );
+}
+
+function getSavedChoiceId() {
+    const data =
+        readChoiceData();
+
+    return (
+        data[config.id] &&
+        data[config.id][role]
+            ? data[config.id][role]
+            : null
+    );
+}
+
+function applyChoiceEffects(
+    choice
+) {
+    if (!choice) {
+        return;
+    }
+
+    selectedChoice =
+        choice.id;
+
+    const id =
+        choice.id;
+
+    if (
+        [
+            "mobilite",
+            "avancee",
+            "rush",
+            "mobilite_zone",
+            "pression",
+            "ramasseur",
+            "flanc",
+            "intervention_feu",
+            "poursuite",
+            "fuite",
+            "commandement",
+            "espoir"
+        ].includes(id)
+    ) {
+        choiceSpeedMultiplier =
+            id === "rush"
+                ? 1.35
+                : 1.25;
+    }
+
+    if (
+        id === "assaut_final"
+    ) {
+        choiceSpeedMultiplier =
+            1.28;
+
+        choiceActionCooldownMultiplier =
+            0.65;
+    }
+
+    if (
+        [
+            "protection",
+            "calme",
+            "couverture",
+            "bouclier_epais",
+            "formation",
+            "tenir",
+            "protection_foule",
+            "dernier_mortier",
+            "ligne_finale",
+            "resilience",
+            "rage",
+            "casque_renforce",
+            "furie_feu",
+            "domination",
+            "commandement"
+        ].includes(id)
+    ) {
+        const reductions = {
+            protection: 0.75,
+            calme: 0.78,
+            couverture: 0.65,
+            bouclier_epais: 0.55,
+            formation: 0.70,
+            tenir: 0.65,
+            protection_foule: 0.60,
+            dernier_mortier: 0.80,
+            ligne_finale: 0.68,
+            resilience: 0.60,
+            rage: 0.80,
+            casque_renforce: 0.72,
+            furie_feu: 0.82,
+            domination: 0.70,
+            commandement: 0.82
+        };
+
+        choiceDamageTakenMultiplier =
+            reductions[id];
+    }
+
+    if (
+        [
+            "tir_rapide",
+            "tir_reactif",
+            "discipline",
+            "pression_tir",
+            "agressif",
+            "avance_zone",
+            "tout_ou_rien"
+        ].includes(id)
+    ) {
+        choiceActionCooldownMultiplier =
+            id === "agressif"
+                ? 0.55
+                : id === "tout_ou_rien"
+                    ? 0.48
+                    : id === "discipline"
+                        ? 0.78
+                        : 0.70;
+    }
+
+    if (
+        [
+            "lbd_puissant",
+            "lbd_stable",
+            "controle",
+            "ligne_finale",
+            "pression_tir"
+        ].includes(id)
+    ) {
+        choiceLbdDamageMultiplier =
+            id === "ligne_finale"
+                ? 1.22
+                : 1.28;
+    }
+
+    if (
+        id === "lancer_lourd"
+    ) {
+        choiceBrickDamageMultiplier =
+            1.45;
+    }
+
+    if (
+        [
+            "ignifuge",
+            "armure_thermique",
+            "chemin_sur",
+            "secouriste"
+        ].includes(id)
+    ) {
+        choiceFireDamageMultiplier =
+            id === "chemin_sur"
+                ? 0.22
+                : id === "secouriste"
+                    ? 0.30
+                    : 0.35;
+    }
+
+    if (
+        [
+            "sprint_feu",
+            "charge_longue"
+        ].includes(id)
+    ) {
+        choiceSpeedMultiplier =
+            id === "charge_longue"
+                ? 1.28
+                : 1.32;
+    }
+
+    if (
+        [
+            "esquive",
+            "esquive_civile",
+            "fuite",
+            "espoir"
+        ].includes(id)
+    ) {
+        choiceJumpWindowBonus =
+            id === "esquive"
+                ? 0.12
+                : 0.09;
+    }
+
+    if (
+        [
+            "voix_forte",
+            "encouragement",
+            "chant",
+            "rassemblement",
+            "discours",
+            "espoir"
+        ].includes(id)
+    ) {
+        const chances = {
+            voix_forte: 0.25,
+            encouragement: 0.25,
+            chant: 0.30,
+            rassemblement: 0.40,
+            discours: 0.45,
+            espoir: 0.25
+        };
+
+        choiceMegaphoneDoubleChance =
+            chances[id];
+    }
+
+    if (
+        [
+            "negociation",
+            "appel_calme",
+            "calme_collectif",
+            "porte_parole"
+        ].includes(id)
+    ) {
+        aiFrozenUntil =
+            Math.max(
+                aiFrozenUntil,
+                performance.now() +
+                900
+            );
+    }
+
+    if (
+        [
+            "abri",
+            "resilience",
+            "rage",
+            "casque_renforce",
+            "furie_feu",
+            "domination",
+            "commandement"
+        ].includes(id)
+    ) {
+        choicePassiveRegen =
+            true;
+    }
+
+    if (
+        id === "zone_double"
+    ) {
+        choiceZoneDoubleChance =
+            0.35;
+    }
+
+    if (
+        id === "poches_pleines"
+    ) {
+        brickCount +=
+            4;
+    }
+
+    if (
+        id === "briques_plus"
+    ) {
+        brickCount +=
+            4;
+    }
+
+    if (
+        id === "matraque_portee"
+    ) {
+        batonRangeBoostUntil =
+            Number.MAX_SAFE_INTEGER;
+    }
+
+    if (
+        id === "mortier_lourd"
+    ) {
+        choiceActionCooldownMultiplier =
+            0.82;
+    }
+
+    if (
+        id === "calme_collectif"
+    ) {
+        choiceDamageTakenMultiplier =
+            0.82;
+    }
+
+    if (
+        id === "discret"
+    ) {
+        choiceDamageTakenMultiplier =
+            0.62;
+    }
+
+    if (
+        id === "avance_zone"
+    ) {
+        choiceSpeedMultiplier =
+            1.22;
+
+        choiceActionCooldownMultiplier =
+            0.76;
+    }
+
+    if (
+        id === "tout_ou_rien"
+    ) {
+        choiceDamageTakenMultiplier =
+            1.18;
+    }
+
+    if (
+        id === "espoir"
+    ) {
+        choiceSpeedMultiplier =
+            1.20;
+    }
+
+    if (
+        id === "souffle"
+    ) {
+        choiceSpeedMultiplier =
+            1.20;
+
+        health =
+            Math.min(
+                100,
+                health + 10
+            );
+
+        updateHealth();
+    }
+}
+
+function showChoiceOverlay() {
+    const roleChoices =
+        config.choices &&
+        config.choices[role]
+            ? config.choices[role]
+            : [];
+
+    if (
+        roleChoices.length === 0
+    ) {
+        choiceOverlay.classList.add(
+            "hidden"
+        );
+
+        return;
+    }
+
+    choiceScene.textContent =
+        config.title;
+
+    choiceIntro.textContent =
+        "Choix propre à ton rôle pour cette scène.";
+
+    choiceButtons.innerHTML =
+        "";
+
+    roleChoices.forEach(
+        (entry) => {
+            const [
+                id,
+                name,
+                description
+            ] = entry;
+
+            const button =
+                document.createElement(
+                    "button"
+                );
+
+            button.className =
+                "tacticChoice";
+
+            button.innerHTML =
+                "<strong>" +
+                name +
+                "</strong><span>" +
+                description +
+                "</span>";
+
+            button.addEventListener(
+                "click",
+                () => {
+                    applyChoiceEffects(
+                        {
+                            id,
+                            name,
+                            description
+                        }
+                    );
+
+                    saveSelectedChoice(
+                        id
+                    );
+
+                    choiceOverlay.classList.add(
+                        "hidden"
+                    );
+
+                    showMessage(
+                        name +
+                        " sélectionné."
+                    );
+                }
+            );
+
+            choiceButtons.appendChild(
+                button
+            );
+        }
+    );
+}
+
+function restoreOrShowChoice() {
+    const roleChoices =
+        config.choices &&
+        config.choices[role]
+            ? config.choices[role]
+            : [];
+
+    const savedId =
+        getSavedChoiceId();
+
+    const saved =
+        roleChoices.find(
+            (entry) =>
+                entry[0] ===
+                savedId
+        );
+
+    if (saved) {
+        applyChoiceEffects(
+            {
+                id: saved[0],
+                name: saved[1],
+                description: saved[2]
+            }
+        );
+
+        choiceOverlay.classList.add(
+            "hidden"
+        );
+    } else {
+        showChoiceOverlay();
+    }
+}
+
+function updatePassiveChoiceEffects(
+    now
+) {
+    if (
+        choicePassiveRegen &&
+        now -
+        lastPassiveRegen >=
+        1800 &&
+        health > 0 &&
+        health < 100
+    ) {
+        lastPassiveRegen =
+            now;
+
+        health =
+            Math.min(
+                100,
+                health + 3
+            );
+
+        updateHealth();
+    }
+}
+
 function showMessage(
     text,
     duration = 1300
@@ -763,6 +1309,16 @@ function addQuestProgress(
             false;
     }
 
+    if (
+        choiceZoneDoubleChance > 0 &&
+        isPlayerInsideControlZone() &&
+        Math.random() <
+        choiceZoneDoubleChance
+    ) {
+        amount *=
+            2;
+    }
+
     questProgress +=
         amount;
 
@@ -843,8 +1399,16 @@ function isJumpDodging() {
         JUMP_DURATION;
 
     return (
-        progress >= 0.18 &&
-        progress <= 0.82
+        progress >=
+            (
+                0.18 -
+                choiceJumpWindowBonus
+            ) &&
+        progress <=
+            (
+                0.82 +
+                choiceJumpWindowBonus
+            )
     );
 }
 
@@ -905,97 +1469,24 @@ function keepPlayerInside() {
     const halfHeight =
         player.offsetHeight / 2;
 
-    let minX =
-        halfWidth + 12;
-
-    let maxX =
-        game.clientWidth -
-        halfWidth -
-        12;
-
-    let minY =
-        game.clientHeight *
-        0.18 +
-        halfHeight;
-
-    let maxY =
-        game.clientHeight *
-        0.75 -
-        halfHeight;
-
-    if (
-        role === "crs"
-    ) {
-        minX =
-            game.clientWidth *
-            0.50;
-
-        minY =
-            game.clientHeight *
-            0.39 +
-            halfHeight;
-    }
-
-    if (
-        role ===
-        "lyceen_casseur"
-    ) {
-        maxX =
-            game.clientWidth *
-            0.50;
-
-        minY =
-            game.clientHeight *
-            0.39 +
-            halfHeight;
-    }
-
-    if (
-        role ===
-        "lyceen_pacifiste"
-    ) {
-        minX =
-            game.clientWidth *
-            0.30;
-
-        maxX =
-            game.clientWidth *
-            0.70;
-
-        minY =
-            game.clientHeight *
-            0.17 +
-            halfHeight;
-
-        if (
-            config.id === "scene08"
-        ) {
-            maxY =
-                game.clientHeight *
-                0.72 -
-                halfHeight;
-        } else {
-            maxY =
-                game.clientHeight *
-                0.39 -
-                halfHeight;
-        }
-    }
-
     playerX =
         Math.max(
-            minX,
+            halfWidth + 8,
             Math.min(
-                maxX,
+                game.clientWidth -
+                    halfWidth -
+                    8,
                 playerX
             )
         );
 
     playerY =
         Math.max(
-            minY,
+            halfHeight + 8,
             Math.min(
-                maxY,
+                game.clientHeight -
+                    halfHeight -
+                    8,
                 playerY
             )
         );
@@ -1710,6 +2201,12 @@ function botProjectileToPlayer(
                     );
             }
 
+            damage =
+                Math.ceil(
+                    damage *
+                    choiceDamageTakenMultiplier
+                );
+
             health -=
                 damage;
 
@@ -1816,9 +2313,12 @@ function useLbd() {
     );
 
     const lbdDamage =
-        nextLbdBoost
-            ? 92
-            : 70;
+        (
+            nextLbdBoost
+                ? 92
+                : 70
+        ) *
+        choiceLbdDamageMultiplier;
 
     nextLbdBoost =
         false;
@@ -1907,10 +2407,33 @@ function useMegaphone() {
         return;
     }
 
-    addQuestProgress();
+    const megaphoneProgress =
+        Math.random() <
+        choiceMegaphoneDoubleChance
+            ? 2
+            : 1;
+
+    addQuestProgress(
+        megaphoneProgress
+    );
+
+    if (
+        [
+            "negociation",
+            "appel_calme"
+        ].includes(
+            selectedChoice
+        )
+    ) {
+        freezeEnemyAi(
+            850
+        );
+    }
 
     showMessage(
-        "Tu utilises ton mégaphone."
+        megaphoneProgress > 1
+            ? "Ton mégaphone compte double !"
+            : "Tu utilises ton mégaphone."
     );
 }
 
@@ -1945,7 +2468,8 @@ function throwBrick() {
 
     damageNpc(
         target,
-        55
+        55 *
+        choiceBrickDamageMultiplier
     );
 
     addQuestProgress();
@@ -1956,10 +2480,13 @@ function primaryAction() {
         performance.now();
 
     const actionCooldown =
-        now <
-        rapidActionUntil
-            ? 180
-            : 430;
+        (
+            now <
+            rapidActionUntil
+                ? 180
+                : 430
+        ) *
+        choiceActionCooldownMultiplier;
 
     if (
         questFinishing ||
@@ -2343,7 +2870,10 @@ function updateFireDamage() {
             now;
 
         health -=
-            7;
+            Math.ceil(
+                7 *
+                choiceFireDamageMultiplier
+            );
 
         flashPlayerHit();
 
@@ -2433,6 +2963,12 @@ function aiAttack(
                         damageReductionFactor
                     );
             }
+
+            meleeDamage =
+                Math.ceil(
+                    meleeDamage *
+                    choiceDamageTakenMultiplier
+                );
 
             health -=
                 meleeDamage;
@@ -2574,7 +3110,8 @@ function updatePlayerMovement() {
             length;
 
         let speed =
-            PLAYER_SPEED;
+            PLAYER_SPEED *
+            choiceSpeedMultiplier;
 
         if (
             performance.now() <
@@ -2585,12 +3122,24 @@ function updatePlayerMovement() {
         }
 
         if (
+            selectedChoice ===
+                "mobilite_zone" &&
+            isPlayerInsideControlZone()
+        ) {
+            speed *=
+                1.25;
+        }
+
+        if (
             role === "crs" &&
             config.crsCharge &&
             keys["shift"]
         ) {
             speed *=
-                2.05;
+                selectedChoice ===
+                    "charge_longue"
+                    ? 2.35
+                    : 2.05;
         }
 
         playerX +=
@@ -2625,6 +3174,10 @@ function update(
         );
 
         updateFireDamage();
+
+        updatePassiveChoiceEffects(
+            now
+        );
     } else {
         drawPlayer();
     }
@@ -2832,6 +3385,8 @@ if (
     updateQuestUi();
 
     updateSpecialUi();
+
+    restoreOrShowChoice();
 
     keepPlayerInside();
 
