@@ -76,7 +76,7 @@ const TALK_DISTANCE = 85;
 const EXIT_DISTANCE = 75;
 
 const SPAWN_X_PERCENT = 0.50;
-const SPAWN_Y_PERCENT = 0.35;
+const SPAWN_Y_PERCENT = 0.30;
 
 const keys = {};
 
@@ -255,9 +255,12 @@ function canWalk(
         return true;
     }
 
+    const transform =
+        getBackgroundTransform();
+
     const feetY =
         screenY +
-        player.offsetHeight * 0.43;
+        45 * transform.scale;
 
     const points = [
         { x: screenX, y: feetY },
