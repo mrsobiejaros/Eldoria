@@ -86,3 +86,11 @@ Eldoria/
 ```
 
 Le fichier `arbre-navigation.pdf` présente le parcours général entre les différentes scènes du jeu.
+
+## Principaux probleme rencontré :
+
+```text
+Le someil (absent de ma vie)
+Les COLLISIONS
+Ajout de fonctionalité fun
+```
